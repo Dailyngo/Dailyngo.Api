@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\EveryDaily.Core\EveryDaily.Core.csproj" />
+      <ProjectReference Include="..\EveryDaily.Domain\EveryDaily.Domain.csproj" />
+      <ProjectReference Include="..\EveryDaily.Persistence\EveryDaily.Persistence.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.13" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.13" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
+    </ItemGroup>
+
+</Project>

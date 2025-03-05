@@ -1,0 +1,89 @@
+
+networks:
+  dailyngo:
+   external: true
+  
+services:
+  dailyngo-db:
+    image: postgres
+    container_name: dailyngo-db
+    hostname: "dailyngo-db"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: P@ssw0rd
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - dailyngo
+    restart: always
+
+  dailyngo-mongodb:
+    image: mongo:4.4
+    container_name: dailyngo-mongodb
+    hostname: "dailyngo-mongodb"
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: Password123
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - dailyngo
+    restart: always
+    
+  # dek-elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+  #   container_name: dek-elasticsearch
+  #   restart: always
+  #   environment:
+  #     - xpack.security.enabled=false
+  #     - discovery.type=single-node
+  #     - ES_JAVA_OPTS=-Xms512m -Xmx512m
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #     nofile:
+  #       soft: 65536
+  #       hard: 65536
+  #   cap_add:
+  #     - IPC_LOCK
+  #   ports:
+  #     - 9200:9200
+  #     - 9300:9300
+  #   networks:
+  #     - dek
+  #   hostname: "elasticsearch"
+
+  dailyngo-redis:
+    image: redis
+    container_name: dailyngo-redis
+    ports:
+      - 6379:6379
+    restart: always
+    hostname: "dailyngo-redis"
+    networks:
+      - dailyngo
+
+  dailyngo-rabbitmq: # login guest:guest
+    image: rabbitmq:3-management
+    hostname: "rabbitmq"
+    labels:
+      NAME: "rabbitmq"
+    container_name: "dailyngo-rabbitmq"
+    ports:
+    - "5672:5672"
+    - "15672:15672"
+    restart: always
+    networks:
+      - dailyngo
+
+
+volumes:
+  postgres-data:
+    driver: local
+  mongo-data:
+    driver: local

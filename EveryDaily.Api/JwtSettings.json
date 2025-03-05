@@ -1,0 +1,9 @@
+{
+  "JwtSettings": {
+    "Secret": "E44A3CC24DE423A3CB5DB9BF1424DD6B44B56142BE5DBE23DC9B9BDE4F5F6B777DD7661424DE423C9BE23C9BFD64A3CB5D4A3CB5B774A3CB5D7756",
+    "Issuer": "dailyngo.com",
+    "Audience": "dailyngo.com",
+    "Ttl": "300000",
+    "RefreshTtl": "650000"
+  }
+}
