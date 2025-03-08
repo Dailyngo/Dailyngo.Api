@@ -41,3 +41,23 @@ jobs:
           file: ./EveryDaily.Api/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/dailyngo.api:latest, ${{ secrets.DOCKERHUB_USERNAME }}/dailyngo.api:${{ github.run_number }}
+   
+# Self-hosted sunucuya deploy işlemi (Yeni eklenen job)
+ deploy-to-selfhosted:
+    runs-on: self-hosted  # Self-hosted runner kullanılıyor
+    needs: docker  # Önce 'docker' job'ının tamamlanmasını bekler
+    steps:
+      - name: Deploy to Server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          # SSH ile sunucuya bağlan ve container'ı güncelle
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${SSH_USER}@${SERVER_IP} "
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/dailyngo.api:latest && \
+            docker stop dailyngo-api || true && \
+            docker rm dailyngo-api || true && \
+            docker run -d --name dailyngo-api -p 8080:80 ${{ secrets.DOCKERHUB_USERNAME }}/dailyngo.api:latest"
