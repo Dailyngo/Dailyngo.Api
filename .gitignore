@@ -52,6 +52,3 @@ ScaffoldingReadMe.txt
 # Rider and Visual Studio Code
 .vscode/
 
-# ASP.NET Core database files
-appsettings.json
-appsettings.Development.json
