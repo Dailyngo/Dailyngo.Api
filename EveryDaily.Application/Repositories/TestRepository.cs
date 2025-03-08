@@ -6,7 +6,6 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EveryDaily.Application.Repositories;
-
 public class TestRepository(IOptions<MongoDbSettings> options) : MongoDbRepository<TestModel,ObjectId>(options)
 {
     public override async Task<TestModel> GetByIdAsync(ObjectId id)
