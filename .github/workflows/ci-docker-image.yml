@@ -2,13 +2,13 @@ name: CI Build Push Image For Dailyngo.Api
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "deployment" ]
     paths-ignore:
       - README.md
       - .vscode/**
       - .gitignore
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "deployment" ]
     paths-ignore:
       - README.md
       - .vscode/**
