@@ -3,6 +3,7 @@ using EveryDaily.Api.Controllers;
 using EveryDaily.Application.Dtos.Auth.Request;
 using EveryDaily.Application.Dtos.Auth.Response;
 using EveryDaily.Application.Services.ControllerCommands.Auth.Commands;
+using EveryDaily.Application.Services.ControllerCommands.Auth.Queries;
 using EveryDaily.Core.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +15,13 @@ namespace EveryDaily.Test.Presentation
     public class AuthTest
     {
         private Mock<IMediator> _mediatorMock;
+        private AuthController _controller;
 
         [SetUp]
         public void SetUp()
         {
             _mediatorMock = new Mock<IMediator>();
+            _controller = new AuthController(_mediatorMock.Object); // Mock objeden gerçek nesne oluşturulmalı
         }
 
         [Test]
@@ -30,7 +33,7 @@ namespace EveryDaily.Test.Presentation
                 EmailOrUserName = "testuser",
                 Password = "testpassword"
             };
-            
+
             var expectedResult = new Response<LoginResponse>
             {
                 IsSuccessful = true,
@@ -44,12 +47,11 @@ namespace EveryDaily.Test.Presentation
                 },
                 StatusCode = 200
             };
-            
+
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<LoginCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedResult);
-            
-            var _controller = new AuthController(_mediatorMock.Object); // Mock objeden gerçek nesne oluşturulmalı
+
 
             // Act
             var resut = await _controller.Login(request) as ObjectResult;
@@ -62,6 +64,69 @@ namespace EveryDaily.Test.Presentation
             Assert.That(response.Data.RefreshToken, Is.EqualTo("refresh"));
             Assert.IsTrue(response.IsSuccessful);
         }
+
+        [Test]
+        public async Task RefreshToken_ValidRequest_ReturnsToken()
+        {
+            // Arrange
+            var command = new RefreshTokenCommand { RefreshToken = "refresh" };
+
+            var expectedResult = new Response<LoginResponse>
+            {
+                IsSuccessful = true,
+                Data = new LoginResponse
+                {
+                    Token = "new_access_token",
+                    RefreshToken = "new_refresh_token",
+                    IsSuccess = true
+                },
+                StatusCode = 200
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<RefreshTokenCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expectedResult);
+
+            // Act
+            var result = await _controller.RefreshToken(command) as ObjectResult;
+            var response = result.Value as Response<LoginResponse>;
+
+            // Assert
+            Assert.IsNotNull(response);
+            Assert.AreEqual(200, response.StatusCode);
+            Assert.IsTrue(response.IsSuccessful);
+            Assert.AreEqual("new_access_token", response.Data.Token);
+            Assert.AreEqual("new_refresh_token", response.Data.RefreshToken);
+        }
+
+        [Test]
+        public async Task EmailConfirmation_ValidRequest_ReturnsSuccess()
+        {
+            // Arrange
+            string email = "test@example.com";
+            string token = "verification_token";
+
+            var expectedResult = new Response<NoContent>
+            {
+                IsSuccessful = true,
+                StatusCode = 200
+            };
+
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<EmailVerifyQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedResult);
+
+            // Act
+            var result = await _controller.EmailConfirmation(email, token) as ObjectResult;
+            var response = result.Value as Response<bool>;
+
+            // Assert
+            Assert.IsNotNull(response);
+            Assert.AreEqual(200, response.StatusCode);
+            Assert.IsTrue(response.IsSuccessful);
+            Assert.IsTrue(response.Data);
+        }
+
 
     }
 }
