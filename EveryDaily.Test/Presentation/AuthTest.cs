@@ -1,4 +1,5 @@
-﻿using EveryDaily.Api.Controllers;
+﻿using System.Runtime.InteropServices.JavaScript;
+using EveryDaily.Api.Controllers;
 using EveryDaily.Application.Dtos.Auth.Request;
 using EveryDaily.Application.Dtos.Auth.Response;
 using EveryDaily.Application.Services.ControllerCommands.Auth.Commands;
@@ -13,59 +14,54 @@ namespace EveryDaily.Test.Presentation
     public class AuthTest
     {
         private Mock<IMediator> _mediatorMock;
-        private AuthController _controller;
 
         [SetUp]
         public void SetUp()
         {
             _mediatorMock = new Mock<IMediator>();
-            _controller = new AuthController(_mediatorMock.Object);
         }
 
+        [Test]
         public async Task Login_ValidRequest_ReturnsToken()
         {
-
             // Arrange
             var request = new LoginRequest
             {
                 EmailOrUserName = "testuser",
                 Password = "testpassword"
             };
-
-            var command = new LoginCommand
-            {
-                EmailOrUserName = request.EmailOrUserName,
-                Password = request.Password
-            };
-
+            
             var expectedResult = new Response<LoginResponse>
             {
                 IsSuccessful = true,
                 Data = new LoginResponse
                 {
-                    ErrorMessage = null,
+                    ErrorMessage = "",
                     IsRegistered = true,
                     RefreshToken = "refresh",
                     IsSuccess = true,
-                    Token = "token"
-                }
+                    Token = "token",
+                },
+                StatusCode = 200
             };
-
-            var cancellationToken = new CancellationToken();
+            
             _mediatorMock
-                .Setup(m => m.Send(command, default))
+                .Setup(m => m.Send(It.IsAny<LoginCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedResult);
+            
+            var _controller = new AuthController(_mediatorMock.Object); // Mock objeden gerçek nesne oluşturulmalı
 
             // Act
-            var result = await _controller.Login(request) as Response<LoginResponse>;
-
+            var resut = await _controller.Login(request) as ObjectResult;
+            var response = resut.Value as Response<LoginResponse>;
             // Assert
-            Assert.IsNotNull(result);
-            Assert.That(result.StatusCode, Is.EqualTo(200));
-            Assert.IsNotNull(result.Data);
-            Assert.That(result.Data.Token, Is.EqualTo("token"));
-            Assert.That(result.Data.RefreshToken, Is.EqualTo("refresh"));
-            Assert.IsTrue(result.IsSuccessful);
+            Assert.IsNotNull(response);
+            Assert.That(response.StatusCode, Is.EqualTo(200));
+            Assert.IsNotNull(response.Data);
+            Assert.That(response.Data.Token, Is.EqualTo("token"));
+            Assert.That(response.Data.RefreshToken, Is.EqualTo("refresh"));
+            Assert.IsTrue(response.IsSuccessful);
         }
+
     }
 }
