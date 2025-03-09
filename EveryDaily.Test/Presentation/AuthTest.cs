@@ -212,13 +212,13 @@ namespace EveryDaily.Test.Presentation
 
             // Act
             var result = await _controller.EmailConfirmation(email, token) as ObjectResult;
-            var response = result.Value as Response<bool>;
+            var response = result.Value as Response<NoContent>;
 
             // Assert
-            Assert.IsNotNull(response);
-            Assert.AreEqual(200, response.StatusCode);
+            Assert.That(response, Is.Not.Null);
+            Assert.That(response.StatusCode, Is.EqualTo(200));
+            Assert.That(response.IsSuccessful, Is.True);
             Assert.IsTrue(response.IsSuccessful);
-            Assert.IsTrue(response.Data);
         }
 
 
