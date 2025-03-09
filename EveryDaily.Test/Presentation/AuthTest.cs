@@ -66,6 +66,72 @@ namespace EveryDaily.Test.Presentation
         }
 
         [Test]
+        public async Task Login_InValidPassword_ReturnsBadRequest()
+        {
+            // Arrange
+            var request = new LoginRequest
+            {
+                EmailOrUserName = "testuser",
+                Password = "testpassword"
+            };
+
+            var expectedResult = new Response<LoginResponse>
+            {
+                IsSuccessful = false,
+                Errors = "Invalid password",
+                StatusCode = 400
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<LoginCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expectedResult);
+
+
+            // Act
+            var resut = await _controller.Login(request) as ObjectResult;
+            var response = resut.Value as Response<LoginResponse>;
+            // Assert
+            Assert.IsNotNull(response);
+            Assert.That(response.StatusCode, Is.EqualTo(400));
+            Assert.IsNull(response.Data);
+            Assert.That(response.Errors, Is.EqualTo("Invalid password"));
+            Assert.IsFalse(response.IsSuccessful);
+        }
+
+        [Test]
+        public async Task Login_InValidUsername_ReturnsBadRequest()
+        {
+            // Arrange
+            var request = new LoginRequest
+            {
+                EmailOrUserName = "testuser",
+                Password = "testpassword"
+            };
+
+            var expectedResult = new Response<LoginResponse>
+            {
+                IsSuccessful = false,
+                Errors = "User not found",
+                StatusCode = 400
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<LoginCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expectedResult);
+
+
+            // Act
+            var resut = await _controller.Login(request) as ObjectResult;
+            var response = resut.Value as Response<LoginResponse>;
+            // Assert
+            Assert.IsNotNull(response);
+            Assert.That(response.StatusCode, Is.EqualTo(400));
+            Assert.IsNull(response.Data);
+            Assert.That(response.Errors, Is.EqualTo("User not found"));
+            Assert.IsFalse(response.IsSuccessful);
+        }
+
+        [Test]
         public async Task RefreshToken_ValidRequest_ReturnsToken()
         {
             // Arrange
@@ -97,6 +163,34 @@ namespace EveryDaily.Test.Presentation
             Assert.IsTrue(response.IsSuccessful);
             Assert.AreEqual("new_access_token", response.Data.Token);
             Assert.AreEqual("new_refresh_token", response.Data.RefreshToken);
+        }
+
+        [Test]
+        public async Task RefreshToken_InValidRequest_ReturnsToken()
+        {
+            // Arrange
+            var command = new RefreshTokenCommand { RefreshToken = "refresh" };
+
+            var expectedResult = new Response<LoginResponse>
+            {
+                IsSuccessful = false,
+              
+                StatusCode = 401
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<RefreshTokenCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expectedResult);
+
+            // Act
+            var result = await _controller.RefreshToken(command) as ObjectResult;
+            var response = result.Value as Response<LoginResponse>;
+
+            // Assert
+            Assert.IsNotNull(response);
+            Assert.AreEqual(401, response.StatusCode);
+            Assert.IsFalse(response.IsSuccessful);
+           
         }
 
         [Test]
