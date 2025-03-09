@@ -3,6 +3,7 @@ using System;
 using EveryDaily.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EveryDaily.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250309141604_abaoutTableadd")]
+    partial class abaoutTableadd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,6 +94,9 @@ namespace EveryDaily.Persistence.Migrations
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("FacultyEntityId")
+                        .HasColumnType("uuid");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -105,6 +111,8 @@ namespace EveryDaily.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FacultyEntityId");
 
                     b.HasIndex("UniversityId");
 
@@ -355,7 +363,7 @@ namespace EveryDaily.Persistence.Migrations
             modelBuilder.Entity("EveryDaily.Domain.Entities.DepartmentEntity", b =>
                 {
                     b.HasOne("EveryDaily.Domain.Entities.FacultyEntity", "Faculty")
-                        .WithMany("Departments")
+                        .WithMany()
                         .HasForeignKey("FacultyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -365,6 +373,10 @@ namespace EveryDaily.Persistence.Migrations
 
             modelBuilder.Entity("EveryDaily.Domain.Entities.FacultyEntity", b =>
                 {
+                    b.HasOne("EveryDaily.Domain.Entities.FacultyEntity", null)
+                        .WithMany("Faculties")
+                        .HasForeignKey("FacultyEntityId");
+
                     b.HasOne("EveryDaily.Domain.Entities.UniversityEntity", "University")
                         .WithMany("Faculties")
                         .HasForeignKey("UniversityId")
@@ -381,7 +393,7 @@ namespace EveryDaily.Persistence.Migrations
 
             modelBuilder.Entity("EveryDaily.Domain.Entities.FacultyEntity", b =>
                 {
-                    b.Navigation("Departments");
+                    b.Navigation("Faculties");
                 });
 
             modelBuilder.Entity("EveryDaily.Domain.Entities.UniversityEntity", b =>

@@ -1,5 +1,6 @@
 using EveryDaily.Core.Entity;
 using EveryDaily.Domain.Entities;
+using EveryDaily.Domain.Entities.About;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,10 @@ public class AppDbContext : DbContext
     
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<RoleEntity> Roles { get; set; }
+    public DbSet<FacultyEntity> Faculties { get; set; }
+    public DbSet<UniversityEntity> Universities { get; set; }
+    public DbSet<AboutEntity> Abouts { get; set; }
+    public DbSet<DepartmentEntity> Departments { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
