@@ -12,7 +12,6 @@ namespace EveryDaily.Api.Controllers;
 public class AuthController(IMediator mediator)
     : CustomControllerBase
 {
-
     /// <summary>
     /// Logs in to the system.
     /// </summary>
