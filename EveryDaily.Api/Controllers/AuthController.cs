@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EveryDaily.Api.Controllers;
 
+[Route("api/[controller]")]
+[ApiController]
 public class AuthController(IMediator mediator)
     : CustomControllerBase
 {
