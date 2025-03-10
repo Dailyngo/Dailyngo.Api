@@ -1,6 +1,5 @@
 using EveryDaily.Core.Entity;
 using EveryDaily.Domain.Entities;
-using EveryDaily.Domain.Entities.About;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
