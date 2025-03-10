@@ -17,6 +17,7 @@ namespace EveryDaily.Tests.Auth
     {
         private Mock<IMediator> _mediatorMock;
         private AuthController _controller;
+        
 
         [SetUp]
         public void SetUp()
@@ -65,22 +66,28 @@ namespace EveryDaily.Tests.Auth
             Assert.That(response.Data.RefreshToken, Is.EqualTo("refresh"));
             Assert.IsTrue(response.IsSuccessful);
         }
-
         [Test]
-        public async Task Login_InvalidUser_ReturnsError()
+        public async Task Login_InValidPassword_ReturnsBadRequest()
         {
             // Arrange
             var request = new LoginRequest
             {
-                EmailOrUserName = "invaliduser",
+                EmailOrUserName = "testuser",
                 Password = "testpassword"
             };
 
             var expectedResult = new Response<LoginResponse>
             {
                 IsSuccessful = false,
-                StatusCode = 401,
-                messages = "Invalid username"
+                Data = new LoginResponse
+                {
+                    ErrorMessage = "Invalid password",
+                    IsRegistered = false,
+                    RefreshToken = null,
+                    IsSuccess = false,
+                    Token = null,
+                },
+                StatusCode = 400
             };
 
             _mediatorMock
@@ -93,26 +100,36 @@ namespace EveryDaily.Tests.Auth
 
             // Assert
             Assert.IsNotNull(response);
-            Assert.That(response.StatusCode, Is.EqualTo(401));
+            Assert.That(response.StatusCode, Is.EqualTo(400));
+            Assert.IsNotNull(response.Data);
+            Assert.That(response.Data.ErrorMessage, Is.EqualTo("Invalid password"));
+            Assert.That(response.Data.IsRegistered, Is.False);
+            Assert.That(response.Data.Token, Is.Null);
+            Assert.That(response.Data.RefreshToken, Is.Null);
             Assert.IsFalse(response.IsSuccessful);
-            Assert.AreEqual("Invalid username", response.messages);
         }
-
         [Test]
-        public async Task Login_InvalidPassword_ReturnsError()
+        public async Task Login_UserNotFound_ReturnsBadRequest()
         {
             // Arrange
             var request = new LoginRequest
             {
                 EmailOrUserName = "testuser",
-                Password = "wrongpassword"
+                Password = "testpassword"
             };
 
             var expectedResult = new Response<LoginResponse>
             {
                 IsSuccessful = false,
-                StatusCode = 401,
-                messages = "Invalid password"
+                Data = new LoginResponse
+                {
+                    ErrorMessage = "User not found",
+                    IsRegistered = false,
+                    RefreshToken = null,
+                    IsSuccess = false,
+                    Token = null,
+                },
+                StatusCode = 400
             };
 
             _mediatorMock
@@ -125,10 +142,16 @@ namespace EveryDaily.Tests.Auth
 
             // Assert
             Assert.IsNotNull(response);
-            Assert.That(response.StatusCode, Is.EqualTo(401));
+            Assert.That(response.StatusCode, Is.EqualTo(400));
+            Assert.IsNotNull(response.Data);
+            Assert.That(response.Data.ErrorMessage, Is.EqualTo("User not found"));
+            Assert.That(response.Data.IsRegistered, Is.False);
+            Assert.That(response.Data.Token, Is.Null);
+            Assert.That(response.Data.RefreshToken, Is.Null);
             Assert.IsFalse(response.IsSuccessful);
-            Assert.AreEqual("Invalid password", response.messages);
         }
+
+
     }
 
 }
