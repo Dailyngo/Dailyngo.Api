@@ -3,11 +3,6 @@ using EveryDaily.Core.Dtos;
 using EveryDaily.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EveryDaily.Application.Services.ControllerCommands.About.Queries
 {
