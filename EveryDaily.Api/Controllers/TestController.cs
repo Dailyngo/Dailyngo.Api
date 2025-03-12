@@ -3,13 +3,14 @@ using EveryDaily.Application.Services.ControllerCommands.Test.Commands;
 using EveryDaily.Application.Services.ControllerCommands.Test.Queries;
 using EveryDaily.Core.ControllerBases;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EveryDaily.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TestController(IMediator mediator) 
+public class TestController(IMediator mediator)
     : CustomControllerBase
 {
     [HttpPost]
@@ -21,8 +22,9 @@ public class TestController(IMediator mediator)
         });
         return CreateActionResultInstance(response);
     }
-    
+
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetAll()
     {
         var response = await mediator.Send(new TestGetAllQuery());

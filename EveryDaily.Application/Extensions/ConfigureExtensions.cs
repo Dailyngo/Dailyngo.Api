@@ -1,4 +1,5 @@
 using EveryDaily.Application.Repositories;
+using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
 using EveryDaily.Core.Settings;
 using EveryDaily.Persistence;
@@ -43,7 +44,7 @@ public static class ConfigureExtensions
       {
          options.AddPolicy(corsName, builder =>
          {
-            builder.WithOrigins("http://localhost:3000", "https://ui.dailyngo.com", "http://ui.dailyngo.com")
+            builder.WithOrigins("http://localhost:3000", "https://dailyngo.com", "http://dailyngo.com")
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();
@@ -68,5 +69,10 @@ public static class ConfigureExtensions
       services.Configure<MongoDbSettings>(configuration.GetSection("MongoDBConnection"));
       // asagidaki ornekteki gibi repositoryler eklenebilir.
       services.AddScoped<MongoDbRepository<TestModel,ObjectId>,TestRepository>();
+   }
+   
+   public static void ConfigureServices(this IServiceCollection services)
+   {
+      services.AddTransient<IUserService, UserService>();
    }
 }
