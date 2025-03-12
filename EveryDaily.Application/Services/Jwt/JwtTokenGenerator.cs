@@ -17,7 +17,6 @@ using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegiste
 
 namespace EveryDaily.Application.Services.Jwt;
 
-
 public class JwtTokenGenerator(
     IConfiguration configuration,
     IOptions<JwtSettings> jwtSettings,
@@ -25,7 +24,7 @@ public class JwtTokenGenerator(
     ICacheService cacheService,
     UserManager<UserEntity> userManager)
 {
-    public string? GenerateToken(UserEntity user)
+    public async Task<string?> GenerateToken(UserEntity user)
     {
         try
         {
@@ -44,14 +43,19 @@ public class JwtTokenGenerator(
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.Secret));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
+            var rawToken = new JwtSecurityToken(
                 issuer: jwtSettings.Value.Issuer,
                 audience: jwtSettings.Value.Audience,
                 claims: claims,
                 expires: DateTime.Now.AddSeconds(Convert.ToDouble(jwtSettings.Value.Ttl)),
                 signingCredentials: credentials);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var token = new JwtSecurityTokenHandler().WriteToken(rawToken);
+
+            var prefix = RedisPrefix.GetAccessTokenKey(user.Id);
+            await cacheService.SetAsync(prefix, token, TimeSpan.FromSeconds(jwtSettings.Value.Ttl));
+
+            return token;
         }
         catch (Exception ex)
         {
@@ -73,7 +77,7 @@ public class JwtTokenGenerator(
                 claims: new Claim[] { new(JwtRegisteredClaimNames.Sub, user.Id.ToString()) },
                 expires: DateTime.UtcNow.AddSeconds(jwtSettings.Value.RefreshTtl),
                 signingCredentials: signIn
-              );
+            );
             token = new JwtSecurityTokenHandler().WriteToken(rawToken);
         }
         catch (Exception ex)
@@ -81,7 +85,8 @@ public class JwtTokenGenerator(
             logger.LogError($"{nameof(GenerateRefreshToken)} throw an exception. Exception: {ex.Message}", ex);
         }
 
-        await cacheService.SetAsync($"{RedisPrefix.TOKENS}:{JwtTokenType.RefreshToken.ToString()}:{user.Id}", token,
+        var prefix = RedisPrefix.GetRefreshTokenKey(user.Id);
+        await cacheService.SetAsync(prefix, token,
             TimeSpan.FromSeconds(jwtSettings.Value.RefreshTtl));
         return token;
     }
@@ -118,8 +123,8 @@ public class JwtTokenGenerator(
             return new ValidateTokenResult(false, "Token validation failed.");
         }
 
-        var userId = GetClaim(token, JwtRegisteredClaimNames.Sub);
-        if (string.IsNullOrEmpty(userId) || !long.TryParse(userId, out _))
+        var userId = GetClaim(token, JwtRegisteredClaimNames.NameId);
+        if (string.IsNullOrEmpty(userId))
             return new ValidateTokenResult(false, "Invalid token! Please login to get a new token!");
 
         var userExistsInCache = await cacheService.ExistsAsync(RedisPrefix.IsExistUserKey(userId));
@@ -133,7 +138,8 @@ public class JwtTokenGenerator(
                 return new ValidateTokenResult(false, "User not found.");
         }
 
-        var redisToken = await cacheService.GetAsync($"{RedisPrefix.TOKENS}:{tokenType.ToString()}:{userId}");
+        var prefix = RedisPrefix.GetAccessTokenKey(Guid.Parse(userId));
+        var redisToken = await cacheService.GetAsync(prefix);
         if (redisToken != token)
             return new ValidateTokenResult(false, "Token does not match the one in Redis.");
 

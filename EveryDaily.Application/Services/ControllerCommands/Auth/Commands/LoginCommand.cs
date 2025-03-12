@@ -24,7 +24,8 @@ public class LoginCommandHandler(
     public async Task<Response<LoginResponse>> Handle(LoginCommand request,
         CancellationToken cancellationToken)
     {
-        var user = await appDbContext.Users.FirstOrDefaultAsync(x => x.Email == request.EmailOrUserName || x.UserName == request.EmailOrUserName,
+        var user = await appDbContext.Users.FirstOrDefaultAsync(
+            x => x.Email == request.EmailOrUserName || x.UserName == request.EmailOrUserName,
             cancellationToken: cancellationToken);
 
         if (user == null)
@@ -33,8 +34,8 @@ public class LoginCommandHandler(
         var result = await SignInManager.PasswordSignInAsync(user, request.Password, false, false);
 
         if (!result.Succeeded) return Response<LoginResponse>.Fail("Invalid password");
-        
-        var token = jwtTokenGenerator.GenerateToken(user);
+
+        var token = await jwtTokenGenerator.GenerateToken(user);
         var refreshToken = await jwtTokenGenerator.GenerateRefreshToken(user);
         return Response<LoginResponse>.Success(new LoginResponse()
         {
@@ -42,6 +43,5 @@ public class LoginCommandHandler(
             Token = token,
             RefreshToken = refreshToken
         });
-
     }
 }

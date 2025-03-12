@@ -38,7 +38,7 @@ public class RefreshTokenHandler(
             if (user == null)
                 return Response<LoginResponse>.Fail("error.login.invalidcredentials", 401);
 
-            var token = jwtTokenGenerator.GenerateToken(user);
+            var token = await jwtTokenGenerator.GenerateToken(user);
             var refreshToken = await jwtTokenGenerator.GenerateRefreshToken(user);
 
             return Response<LoginResponse>.Success(new LoginResponse
