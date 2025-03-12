@@ -46,7 +46,7 @@ public class RefreshTokenHandler(
         }
         catch (Exception ex)
         {
-            //logger.SendError(ex, nameof(RefreshTokenCommand));
+            logger.LogError(ex, ex.Message);
             return Response<LoginResponse>.Fail("error.unknown", 401);
         }
     }

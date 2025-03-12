@@ -9,6 +9,6 @@ public class LoginResponse
     public string RefreshToken { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string ErrorMessage { get; set; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public bool? IsRegistered { get; set; } = false;
+    public bool IsRegistered { get; set; }
+    public bool IsEmailConfirmed { get; set; }
 }

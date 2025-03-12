@@ -39,6 +39,18 @@ public class AuthController(IMediator mediator)
         var result = await mediator.Send(command);
         return CreateActionResultInstance(result);
     }
+    
+    [HttpPost("register")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login([FromBody] RegisterRequest request)
+    {
+        var command = new RegisterCommand
+        {
+            Data = request
+        };
+        var result = await mediator.Send(command);
+        return CreateActionResultInstance(result);
+    }
 
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
