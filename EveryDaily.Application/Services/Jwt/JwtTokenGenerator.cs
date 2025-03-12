@@ -60,7 +60,7 @@ public class JwtTokenGenerator(
         }
     }
 
-    public async Task<string> GenerateRefreshToken(UserEntity user)
+    public virtual async Task<string> GenerateRefreshToken(UserEntity user)
     {
         var token = "";
         try

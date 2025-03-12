@@ -12,6 +12,7 @@ using EveryDaily.Core.Dtos;
 using EveryDaily.Core.Settings;
 using EveryDaily.Domain.Entities;
 using EveryDaily.Persistence;
+using EveryDaily.Test.DbContextMoq;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -28,14 +29,8 @@ namespace EveryDaily.Test.Application
     [TestFixture]
     public class LoginCommandHandlerTests
     {
-        private Mock<DbSet<UserEntity>> _dbSetMock;
-        private Mock<AppDbContext> _appDbContextMock;
         private Mock<SignInManager<UserEntity>> _signInManagerMock;
         private Mock<JwtTokenGenerator> _jwtTokenGeneratorMock;
-        private Mock<IConfiguration> _configurationMock;
-        private Mock<IOptions<JwtSettings>> _jwtSettingsMock;
-        private Mock<ILogger<JwtTokenGenerator>> _loggerMock;
-        private Mock<ICacheService> _cacheServiceMock;
         private Mock<UserManager<UserEntity>> _userManagerMock;
 
         private LoginCommandHandler _handler;
@@ -43,9 +38,7 @@ namespace EveryDaily.Test.Application
         [SetUp]
         public void SetUp()
         {
-            _dbSetMock = new Mock<DbSet<UserEntity>>();
             // Mock'lar oluşturuluyor
-            _appDbContextMock = new Mock<AppDbContext>();
 
             // UserManager mock'lama
             _userManagerMock = new Mock<UserManager<UserEntity>>(
@@ -59,18 +52,8 @@ namespace EveryDaily.Test.Application
                 Mock.Of<IUserClaimsPrincipalFactory<UserEntity>>(),
                 null, null, null, null);
 
-            _configurationMock = new Mock<IConfiguration>();
-            _jwtSettingsMock = new Mock<IOptions<JwtSettings>>();
-            _loggerMock = new Mock<ILogger<JwtTokenGenerator>>();
-            _cacheServiceMock = new Mock<ICacheService>();
             _jwtTokenGeneratorMock = new Mock<JwtTokenGenerator>(null, null, null, null, _userManagerMock.Object);
 
-            // Handler oluşturuluyor
-            _handler = new LoginCommandHandler(
-                _appDbContextMock.Object,
-                _signInManagerMock.Object,
-                _jwtTokenGeneratorMock.Object
-            );
         }
 
         [Test]
@@ -87,14 +70,21 @@ namespace EveryDaily.Test.Application
             {
                 Name = "Test",
                 Surname = "User",
+                Email = "testuser@example.com",
                 IsDeleted = false,
                 CreatedAt = DateTimeOffset.Now
             };
 
-            // Mock'ları setup et
-            _userManagerMock
-                .Setup(x => x.FindByNameAsync(It.IsAny<string>()))
-                .ReturnsAsync(userEntity);
+            await using var appDbContext = new AppDbContext(InMemoryDbContextOptionsFactory.CreateDbContextOptions());
+            // Handler oluşturuluyor
+            _handler = new LoginCommandHandler(
+                appDbContext,
+                _signInManagerMock.Object,
+                _jwtTokenGeneratorMock.Object
+            );
+            
+            await appDbContext.Users.AddAsync(userEntity);
+            await appDbContext.SaveChangesAsync();
 
             _signInManagerMock
                 .Setup(x => x.PasswordSignInAsync(It.IsAny<UserEntity>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
@@ -103,42 +93,11 @@ namespace EveryDaily.Test.Application
             _jwtTokenGeneratorMock
                 .Setup(x => x.GenerateToken(It.IsAny<UserEntity>()))
                 .Returns("generated-token");
-
-            _appDbContextMock.Setup(x => x.Users).Returns(_dbSetMock.Object);
-
-            var users = new List<UserEntity>
-        {
-            new UserEntity { Email = "testuser@example.com", UserName = "testuser", Name = "Test", Surname = "User" }
-        }.AsQueryable();
-
-            // IQueryable için setup
-            _dbSetMock.As<IQueryable<UserEntity>>()
-                .Setup(m => m.Provider).Returns(users.Provider);
-            _dbSetMock.As<IQueryable<UserEntity>>()
-                .Setup(m => m.Expression).Returns(users.Expression);
-            _dbSetMock.As<IQueryable<UserEntity>>()
-                .Setup(m => m.ElementType).Returns(users.ElementType);
-            _dbSetMock.As<IQueryable<UserEntity>>()
-                .Setup(m => m.GetEnumerator()).Returns(users.GetEnumerator());
-
-            // FirstOrDefaultAsync metodunu manuel olarak mock'la
-            _dbSetMock.Setup(x => x.FirstOrDefaultAsync(It.IsAny<Expression<Func<UserEntity, bool>>>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(users.FirstOrDefault());
-
-            var expectedResult = new Response<LoginResponse>
-            {
-                IsSuccessful = true,
-                Data = new LoginResponse
-                {
-                    Token = "generated-token",
-                    RefreshToken = "refresh-token",
-                    IsSuccess = true,
-                    ErrorMessage = "",
-                    IsRegistered = true
-                },
-                StatusCode = 200
-            };
-
+            
+            _jwtTokenGeneratorMock
+                .Setup(x => x.GenerateRefreshToken(It.IsAny<UserEntity>()))
+                .ReturnsAsync("refresh-token");
+            
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
