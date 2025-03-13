@@ -1,4 +1,5 @@
 ﻿using EveryDaily.Application.Dtos.About.Request;
+using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Persistence;
 using MediatR;
@@ -12,15 +13,23 @@ namespace EveryDaily.Application.Services.ControllerCommands.About.Commands
     }
 
 
-    public class UpdateAboutHandler(AppDbContext appDbContext)
+    public class UpdateAboutHandler(AppDbContext appDbContext,IUserService userService)
         : IRequestHandler<UpdateAboutCommand, Response<NoContent>>
     {
         public async Task<Response<NoContent>> Handle(UpdateAboutCommand request, CancellationToken cancellationToken)
         {
 
-            var userId = await appDbContext.Users.Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
 
-            var about = await appDbContext.Abouts.FirstOrDefaultAsync(x => x.Id == request.Data.Id && x.UserId == userId, cancellationToken);
+            var userID = userService.GetUserId();
+            var email = userService.GetUserEmail();
+
+
+            var about = await appDbContext.Abouts.FirstOrDefaultAsync(x => x.Id == request.Data.Id && x.UserId == userID, cancellationToken);
+
+            //var about = await appDbContext.Abouts
+            //    .Include(i=> i.User)
+            //    .FirstOrDefaultAsync(x => x.UserId == userID, cancellationToken);
+
 
             if (about == null)
             {

@@ -1,5 +1,4 @@
 ﻿using EveryDaily.Application.Dtos.About.Response;
-using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Persistence;
 using MediatR;
@@ -7,26 +6,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EveryDaily.Application.Services.ControllerCommands.About.Queries
 {
-    public class GetAboutQuery : IRequest<Response<GetAboutResponse>>
+    public class GetOtherUserAboutQuery : IRequest<Response<GetAboutResponse>>
     {
+        public Guid UserID { get; set; } // Root’tan gelen kullanıcı ID'si
 
+        public GetOtherUserAboutQuery(Guid userId)
+        {
+            UserID = userId;
+        }
     }
 
-    public class GetAboutQueryHandler(AppDbContext appDbContext,IUserService userService)
-        : IRequestHandler<GetAboutQuery, Response<GetAboutResponse>>
-{
-        public async Task<Response<GetAboutResponse>> Handle(GetAboutQuery request, CancellationToken cancellationToken)
+
+    public class GetOtherUserAboutQueryHandler(AppDbContext appDbContext)
+        : IRequestHandler<GetOtherUserAboutQuery, Response<GetAboutResponse>>
+    {
+        public  async Task<Response<GetAboutResponse>> Handle(GetOtherUserAboutQuery request, CancellationToken cancellationToken)
         {
 
 
-            var userID = userService.GetUserId();
-            var email = userService.GetUserEmail();
-
             var about = await appDbContext.Abouts
-                .Include(i => i.Department)
-                .ThenInclude(i => i.Faculty)
-                .ThenInclude(i => i.University)
-                .FirstOrDefaultAsync(x => x.UserId == userID, cancellationToken);
+                           .Include(i => i.Department)
+                           .ThenInclude(i => i.Faculty)
+                           .ThenInclude(i => i.University)
+                           .FirstOrDefaultAsync(x => x.UserId == request.UserID, cancellationToken);
 
             if (about == null)
             {
@@ -54,6 +56,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.About.Queries
                 }
             };
             return Response<GetAboutResponse>.Success(response);
+
         }
     }
 }
