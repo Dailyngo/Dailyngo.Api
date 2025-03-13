@@ -24,7 +24,7 @@ public class TestController(IMediator mediator)
     }
 
     [HttpGet]
-    [Authorize]
+    // [Authorize]
     public async Task<IActionResult> GetAll()
     {
         var response = await mediator.Send(new TestGetAllQuery());

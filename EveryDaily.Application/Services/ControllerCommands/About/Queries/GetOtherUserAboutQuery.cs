@@ -22,8 +22,6 @@ namespace EveryDaily.Application.Services.ControllerCommands.About.Queries
     {
         public  async Task<Response<GetAboutResponse>> Handle(GetOtherUserAboutQuery request, CancellationToken cancellationToken)
         {
-
-
             var about = await appDbContext.Abouts
                            .Include(i => i.Department)
                            .ThenInclude(i => i.Faculty)

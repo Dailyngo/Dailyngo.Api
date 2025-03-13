@@ -52,8 +52,6 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddAuthentication();
-
 builder.Services.AddTransient<ICacheService, CacheService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(setup =>
@@ -140,7 +138,7 @@ using (var scope = app.Services.CreateScope())
 
 try
 {
-    Seed.SeedData(app.Services).Wait();
+    Seed.SeedCollectorData(app.Services).Wait();
 }
 catch (Exception ex)
 {

@@ -17,10 +17,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.About.Queries
 {
         public async Task<Response<GetAboutResponse>> Handle(GetAboutQuery request, CancellationToken cancellationToken)
         {
-
-
             var userID = userService.GetUserId();
-            var email = userService.GetUserEmail();
 
             var about = await appDbContext.Abouts
                 .Include(i => i.Department)
