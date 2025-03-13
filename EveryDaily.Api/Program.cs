@@ -9,8 +9,10 @@ using EveryDaily.Domain.Entities;
 using EveryDaily.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -22,7 +24,11 @@ var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 builder.Configuration.AddJsonFile($"appsettings.{env ?? ""}.json");
 builder.Configuration.AddJsonFile($"JwtSettings.json");
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(opt =>
+{
+    var policy = new AuthorizationPolicyBuilder("Bearer").RequireAuthenticatedUser().Build();
+    opt.Filters.Add(new AuthorizeFilter(policy));
+});
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -45,6 +51,8 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]))
         };
     });
+
+builder.Services.AddAuthentication();
 
 builder.Services.AddTransient<ICacheService, CacheService>();
 builder.Services.AddEndpointsApiExplorer();
@@ -79,15 +87,16 @@ builder.Services.AddSwaggerGen(setup =>
 });
 
 
-
 // Common
 var dailyngoCors = "DailyngoCors";
 builder.Services.ConfigureRedis(builder.Configuration);
 builder.Services.ConfigureNpgsql(builder.Configuration);
 builder.Services.ConfigureCors(dailyngoCors);
 builder.Services.ConfigureMongoDbRepositories(builder.Configuration);
+builder.Services.ConfigureServices();
 
 #region JWT
+
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 builder.Services.AddIdentity<UserEntity, RoleEntity>(options =>
@@ -110,7 +119,9 @@ builder.Services.AddIdentity<UserEntity, RoleEntity>(options =>
     .AddRoleStore<RoleStore<RoleEntity, AppDbContext, Guid>>();
 
 builder.Services.AddScoped<JwtTokenGenerator>();
+
 #endregion
+
 builder.Services.AddMediatR(typeof(MediatorAssembly).Assembly);
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
@@ -126,15 +137,14 @@ using (var scope = app.Services.CreateScope())
         throw;
     }
 }
+
 try
 {
     Seed.SeedData(app.Services).Wait();
-
 }
 catch (Exception ex)
 {
     Console.WriteLine(ex);
-    
 }
 
 app.UseCors(dailyngoCors);
@@ -143,6 +153,7 @@ app.UseRouting();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseResponseCaching();
+app.UseMiddleware<JwtMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
