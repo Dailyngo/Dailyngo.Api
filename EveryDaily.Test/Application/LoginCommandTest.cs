@@ -12,7 +12,7 @@ using EveryDaily.Core.Dtos;
 using EveryDaily.Core.Settings;
 using EveryDaily.Domain.Entities;
 using EveryDaily.Persistence;
-using EveryDaily.Test.DbContextMoq;
+using EveryDaily.Test.DefaultMoq;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -41,9 +41,7 @@ namespace EveryDaily.Test.Application
             // Mock'lar oluşturuluyor
 
             // UserManager mock'lama
-            _userManagerMock = new Mock<UserManager<UserEntity>>(
-                Mock.Of<IUserStore<UserEntity>>(),
-                null, null, null, null, null, null, null, null);
+            _userManagerMock = SetupDefaultMoq.CreateUserManagerMock();
 
             // SignInManager mock'lama
             _signInManagerMock = new Mock<SignInManager<UserEntity>>(
@@ -75,7 +73,7 @@ namespace EveryDaily.Test.Application
                 CreatedAt = DateTimeOffset.Now
             };
 
-            await using var appDbContext = new AppDbContext(InMemoryDbContextOptionsFactory.CreateDbContextOptions());
+            await using var appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
             // Handler oluşturuluyor
             _handler = new LoginCommandHandler(
                 appDbContext,
