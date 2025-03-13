@@ -131,11 +131,12 @@ public class JwtTokenGenerator(
 
         if (!userExistsInCache)
         {
-            var userExists = await userManager.Users.AnyAsync(a => a.Id == Guid.Parse(userId) & a.EmailConfirmed);
-            await cacheService.SetAsync(RedisPrefix.IsExistUserKey(userId), userId, TimeSpan.FromMinutes(30));
+            var userExists = await userManager.Users.AnyAsync(a => a.Id == Guid.Parse(userId) && !a.IsDeleted);
 
             if (!userExists)
                 return new ValidateTokenResult(false, "User not found.");
+            
+            await cacheService.SetAsync(RedisPrefix.IsExistUserKey(userId), userId, TimeSpan.FromMinutes(30));
         }
 
         var prefix = RedisPrefix.GetAccessTokenKey(Guid.Parse(userId));

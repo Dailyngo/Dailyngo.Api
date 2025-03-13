@@ -211,7 +211,7 @@ namespace EveryDaily.Test.Presentation
                 .Setup(m => m.Send(It.IsAny<EmailVerifyQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedResult);
 
             // Act
-            var result = await _controller.EmailConfirmation(email, token) as ObjectResult;
+            var result = await _controller.EmailConfirmation(token) as ObjectResult;
             var response = result.Value as Response<NoContent>;
 
             // Assert

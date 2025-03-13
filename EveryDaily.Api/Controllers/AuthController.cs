@@ -59,13 +59,13 @@ public class AuthController(IMediator mediator)
         return CreateActionResultInstance(response);
     }
 
-    [HttpGet("email-confirmation")]
-    public async Task<IActionResult> EmailConfirmation([FromQuery] string e, [FromQuery] string t)
+    [Authorize]
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> EmailConfirmation([FromBody] string verifyCode)
     {
         var response = await mediator.Send(new EmailVerifyQuery
         {
-            Email = e,
-            Token = t
+            VerificationCode = verifyCode
         });
         return CreateActionResultInstance(response);
     }

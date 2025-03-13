@@ -23,6 +23,7 @@ var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 builder.Configuration.AddJsonFile($"appsettings.{env ?? ""}.json");
 builder.Configuration.AddJsonFile($"JwtSettings.json");
+builder.Configuration.AddJsonFile("emailSettings.json");
 
 builder.Services.AddControllers(opt =>
 {
@@ -31,6 +32,7 @@ builder.Services.AddControllers(opt =>
 });
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailOptions"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
 builder.Services.AddAuthentication(options =>
@@ -90,6 +92,7 @@ builder.Services.AddSwaggerGen(setup =>
 // Common
 var dailyngoCors = "DailyngoCors";
 builder.Services.ConfigureRedis(builder.Configuration);
+builder.Services.ConfigureMassTransit(builder.Configuration);
 builder.Services.ConfigureNpgsql(builder.Configuration);
 builder.Services.ConfigureCors(dailyngoCors);
 builder.Services.ConfigureMongoDbRepositories(builder.Configuration);
