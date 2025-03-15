@@ -52,7 +52,7 @@ namespace EveryDaily.Api.Controllers
             return CreateActionResultInstance(response);
         }
 
-       // [Authorize]
+
         [HttpGet("other-about/{userId}")]
         public async Task<IActionResult> OtherGet(Guid userId)
         {
@@ -61,11 +61,16 @@ namespace EveryDaily.Api.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchUsers( SearchUserResponse request)
+        public async Task<IActionResult> SearchUsers([FromQuery] string SearchTerm)
         {
-            var response = await mediator.Send(new SearchUsersQuery(request.Username));
+            var response = await mediator.Send(new SearchUsersQuery()
+            {
+                SearchTerm = SearchTerm
+            });
             return CreateActionResultInstance(response);
         }
+
+
 
 
     }
