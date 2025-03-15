@@ -1,5 +1,4 @@
 using EveryDaily.Core.Entity;
-using EveryDaily.Domain.Entities.About;
 using Microsoft.AspNetCore.Identity;
 
 namespace EveryDaily.Domain.Entities;
@@ -12,6 +11,5 @@ public class UserEntity : IdentityUser<Guid>, IEntityBase
     public DateTimeOffset? CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
-
-    public AboutEntity About{ get; set; }
+    public AboutEntity About { get; set; }
 }

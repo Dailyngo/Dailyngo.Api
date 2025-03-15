@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-
 namespace EveryDaily.Application.Dtos.Auth.Request;
 
 public class RegisterRequest

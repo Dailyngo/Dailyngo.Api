@@ -1,3 +1,4 @@
+using EveryDaily.Application.Services.Jwt;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Entities;
 using EveryDaily.Domain.Enums;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace EveryDaily.Application.Services.Jwt;
+namespace EveryDaily.Application.Middleware;
 
 public class JwtMiddleware
 {
@@ -46,9 +47,13 @@ public class JwtMiddleware
         else
             token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
-        var validateTokenResult = token == null
-            ? new ValidateTokenResult(false, "", "")
-            : await jwtTokenGenerator.VerifyToken(token, JwtTokenType.AccessToken);
+        if (string.IsNullOrEmpty(token))
+        {
+            await _next(context);
+            return;
+        }
+
+        var validateTokenResult = await jwtTokenGenerator.VerifyToken(token, JwtTokenType.AccessToken);
         if (validateTokenResult.IsValid)
         {
             context.Items["userid"] = validateTokenResult.UserClaims?
@@ -56,21 +61,14 @@ public class JwtMiddleware
             context.Items["email"] = validateTokenResult.UserClaims?
                 .FirstOrDefault(x => x.Type.Equals(JwtRegisteredClaimNames.Email))?.Value;
         }
-        else if (token != null)
+        else
         {
             logger.LogError(validateTokenResult.Message, new Exception(validateTokenResult.Message));
-        }
-
-        if (!validateTokenResult.IsValid &&
-            token != null) // && (context.Request.Path.HasValue && !context.Request.Path.Value.ToLower().EndsWith("examhub")))
-        {
             context.Response.StatusCode = 401;
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsJsonAsync(new { message = validateTokenResult.Message});
             return;
         }
-
-
         await _next(context);
     }
 }

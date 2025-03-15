@@ -3,6 +3,7 @@ using System;
 using EveryDaily.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EveryDaily.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250315170826_mig-profileCard")]
+    partial class migprofileCard
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,6 +118,41 @@ namespace EveryDaily.Persistence.Migrations
                     b.HasIndex("UniversityId");
 
                     b.ToTable("Faculties");
+                });
+
+            modelBuilder.Entity("EveryDaily.Domain.Entities.ProfileCardEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FollowUp")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Follower")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("PostCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("ProfileCards");
                 });
 
             modelBuilder.Entity("EveryDaily.Domain.Entities.RoleEntity", b =>
@@ -380,6 +418,17 @@ namespace EveryDaily.Persistence.Migrations
                     b.Navigation("University");
                 });
 
+            modelBuilder.Entity("EveryDaily.Domain.Entities.ProfileCardEntity", b =>
+                {
+                    b.HasOne("EveryDaily.Domain.Entities.UserEntity", "User")
+                        .WithOne("ProfileCard")
+                        .HasForeignKey("EveryDaily.Domain.Entities.ProfileCardEntity", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EveryDaily.Domain.Entities.DepartmentEntity", b =>
                 {
                     b.Navigation("Abouts");
@@ -398,6 +447,9 @@ namespace EveryDaily.Persistence.Migrations
             modelBuilder.Entity("EveryDaily.Domain.Entities.UserEntity", b =>
                 {
                     b.Navigation("About")
+                        .IsRequired();
+
+                    b.Navigation("ProfileCard")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

@@ -1,5 +1,4 @@
 ﻿using EveryDaily.Core.Entity;
-using EveryDaily.Domain.Entities.About;
 using System;
 using System.Collections.Generic;
 using System.Linq;
