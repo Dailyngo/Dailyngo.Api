@@ -60,17 +60,7 @@ namespace EveryDaily.Api.Controllers
             return CreateActionResultInstance(response);
         }
 
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchUsers([FromQuery] string SearchTerm)
-        {
-            var response = await mediator.Send(new SearchUsersQuery()
-            {
-                SearchTerm = SearchTerm
-            });
-            return CreateActionResultInstance(response);
-        }
-
-
+       
 
 
     }

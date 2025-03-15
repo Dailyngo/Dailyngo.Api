@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EveryDaily.Application.Dtos.About.Response
+namespace EveryDaily.Application.Dtos.User.Response
 {
     public class SearchUserResponse
     {

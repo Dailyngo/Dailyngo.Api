@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<UniversityEntity> Universities { get; set; }
     public DbSet<AboutEntity> Abouts { get; set; }
     public DbSet<DepartmentEntity> Departments { get; set; }
+    public DbSet<ProfileCardEntity> ProfileCards { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

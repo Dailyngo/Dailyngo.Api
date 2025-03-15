@@ -1,4 +1,4 @@
-﻿using EveryDaily.Application.Dtos.About.Response;
+﻿using EveryDaily.Application.Dtos.User.Response;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Persistence;
 using MediatR;
@@ -9,9 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EveryDaily.Application.Services.ControllerCommands.About.Queries
+namespace EveryDaily.Application.Services.ControllerCommands.User.Queries
 {
-    public class SearchUsersQuery: IRequest<Response<List<SearchUserResponse>>>
+    public class SearchUsersQuery : IRequest<Response<List<SearchUserResponse>>>
     {
         public string SearchTerm { get; set; }
     }
@@ -29,9 +29,9 @@ namespace EveryDaily.Application.Services.ControllerCommands.About.Queries
                     x.UserName.ToLower().Contains(searchTerm))
                 .Select(u => new SearchUserResponse
                 {
-                    Id = u.Id, 
+                    Id = u.Id,
                     Username = u.UserName,
-                    FullName = u.FullName 
+                    FullName = u.FullName
 
                 })
                    .ToListAsync(cancellationToken);
