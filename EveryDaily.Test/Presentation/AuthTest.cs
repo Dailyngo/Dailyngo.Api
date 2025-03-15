@@ -198,7 +198,11 @@ namespace EveryDaily.Test.Presentation
         {
             // Arrange
             string email = "test@example.com";
-            string token = "verification_token";
+            string token = "123412";
+            var request = new EmailVerifyRequest
+            {
+                VerifyCode = token
+            };
 
             var expectedResult = new Response<NoContent>
             {
@@ -211,7 +215,7 @@ namespace EveryDaily.Test.Presentation
                 .Setup(m => m.Send(It.IsAny<EmailVerifyQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedResult);
 
             // Act
-            var result = await _controller.EmailConfirmation(token) as ObjectResult;
+            var result = await _controller.EmailConfirmation(request) as ObjectResult;
             var response = result.Value as Response<NoContent>;
 
             // Assert
