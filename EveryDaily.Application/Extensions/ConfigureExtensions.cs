@@ -1,8 +1,13 @@
+using EveryDaily.Application.Consumers;
 using EveryDaily.Application.Repositories;
+using EveryDaily.Application.Services.Email;
+using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
 using EveryDaily.Core.Settings;
+using EveryDaily.Domain.Prefix.RabbitMQ;
 using EveryDaily.Persistence;
 using EveryDaily.Persistence.BaseRepositories;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +38,26 @@ public static class ConfigureExtensions
       });
    }
    
+   public static void ConfigureMassTransit(this IServiceCollection services, IConfiguration configuration)
+   {
+      services.AddMassTransit(x =>
+      {
+         x.AddConsumersFromNamespaceContaining<EmailSendingConsumer>();
+         x.UsingRabbitMq((context, cfg) =>
+         {
+            cfg.Host(configuration["ConnectionStrings:EventBusConnection"]);
+            cfg.UseMessageRetry(r => r.Interval(10, TimeSpan.FromSeconds(5)));
+            cfg.UseDelayedRedelivery(r => r.Intervals(TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(10)));
+        
+            cfg.ReceiveEndpoint(RabbitmqConstacts.EMAIL_SENDING_QUEUE, c =>
+            {
+               c.ConfigureConsumer<EmailSendingConsumer>(context);
+            });
+
+         });
+      });
+   }
+   
    /// <summary>
    /// Cors politikalarinin yapilandirilmasi
    /// </summary>
@@ -43,7 +68,7 @@ public static class ConfigureExtensions
       {
          options.AddPolicy(corsName, builder =>
          {
-            builder.WithOrigins("http://localhost:3000", "https://ui.dailyngo.com", "http://ui.dailyngo.com")
+            builder.WithOrigins("http://localhost:3000", "https://dailyngo.com", "http://dailyngo.com")
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();
@@ -68,5 +93,11 @@ public static class ConfigureExtensions
       services.Configure<MongoDbSettings>(configuration.GetSection("MongoDBConnection"));
       // asagidaki ornekteki gibi repositoryler eklenebilir.
       services.AddScoped<MongoDbRepository<TestModel,ObjectId>,TestRepository>();
+   }
+   
+   public static void ConfigureServices(this IServiceCollection services)
+   {
+      services.AddTransient<IUserService, UserService>();
+      services.AddTransient<IEmailService, EmailService>();
    }
 }

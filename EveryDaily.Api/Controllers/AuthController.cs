@@ -1,16 +1,19 @@
 using EveryDaily.Application.Dtos.Auth.Request;
+using EveryDaily.Application.Middleware;
 using EveryDaily.Application.Services.ControllerCommands.Auth.Commands;
 using EveryDaily.Application.Services.ControllerCommands.Auth.Queries;
 using EveryDaily.Core.ControllerBases;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EveryDaily.Api.Controllers;
 
+[Route("api/[controller]")]
+[ApiController]
 public class AuthController(IMediator mediator)
     : CustomControllerBase
 {
-
     /// <summary>
     /// Logs in to the system.
     /// </summary>
@@ -26,6 +29,7 @@ public class AuthController(IMediator mediator)
     /// <param name="request">The login request containing the username or email and password.</param>
     /// <returns>A response indicating success or failure.</returns>
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var command = new LoginCommand
@@ -37,20 +41,32 @@ public class AuthController(IMediator mediator)
         return CreateActionResultInstance(result);
     }
     
+    [HttpPost("register")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login([FromBody] RegisterRequest request)
+    {
+        var command = new RegisterCommand
+        {
+            Data = request
+        };
+        var result = await mediator.Send(command);
+        return CreateActionResultInstance(result);
+    }
+
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
     {
         var response = await mediator.Send(command);
         return CreateActionResultInstance(response);
     }
-    
-    [HttpGet("email-confirmation")]
-    public async Task<IActionResult> EmailConfirmation([FromQuery] string e, [FromQuery] string t)
+
+    [CustomAuthorize]
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> EmailConfirmation([FromBody] EmailVerifyRequest request)
     {
         var response = await mediator.Send(new EmailVerifyQuery
         {
-            Email = e,
-            Token = t
+            VerificationCode = request.VerifyCode
         });
         return CreateActionResultInstance(response);
     }
