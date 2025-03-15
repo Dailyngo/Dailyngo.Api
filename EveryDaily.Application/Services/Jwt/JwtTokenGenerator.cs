@@ -131,7 +131,7 @@ public class JwtTokenGenerator(
 
         if (!userExistsInCache)
         {
-            var userExists = await userManager.Users.AnyAsync(a => a.Id == Guid.Parse(userId) & a.EmailConfirmed);
+            var userExists = await userManager.Users.AnyAsync(a => a.Id == Guid.Parse(userId) && !a.IsDeleted);
 
             if (!userExists)
                 return new ValidateTokenResult(false, "User not found.");

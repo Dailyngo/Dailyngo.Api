@@ -1,4 +1,5 @@
 using EveryDaily.Application.Dtos.Auth.Request;
+using EveryDaily.Application.Middleware;
 using EveryDaily.Application.Services.ControllerCommands.Auth.Commands;
 using EveryDaily.Application.Services.ControllerCommands.Auth.Queries;
 using EveryDaily.Core.ControllerBases;
@@ -59,13 +60,13 @@ public class AuthController(IMediator mediator)
         return CreateActionResultInstance(response);
     }
 
-    [HttpGet("email-confirmation")]
-    public async Task<IActionResult> EmailConfirmation([FromQuery] string e, [FromQuery] string t)
+    [CustomAuthorize]
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> EmailConfirmation([FromBody] EmailVerifyRequest request)
     {
         var response = await mediator.Send(new EmailVerifyQuery
         {
-            Email = e,
-            Token = t
+            VerificationCode = request.VerifyCode
         });
         return CreateActionResultInstance(response);
     }
