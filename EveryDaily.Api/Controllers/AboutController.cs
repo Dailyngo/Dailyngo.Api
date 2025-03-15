@@ -7,6 +7,7 @@ using EveryDaily.Core.ControllerBases;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace EveryDaily.Api.Controllers
 {
@@ -51,11 +52,18 @@ namespace EveryDaily.Api.Controllers
             return CreateActionResultInstance(response);
         }
 
-        [Authorize]
+       // [Authorize]
         [HttpGet("other-about/{userId}")]
         public async Task<IActionResult> OtherGet(Guid userId)
         {
             var response = await mediator.Send(new GetOtherUserAboutQuery(userId));
+            return CreateActionResultInstance(response);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchUsers( SearchUserResponse request)
+        {
+            var response = await mediator.Send(new SearchUsersQuery(request.Username));
             return CreateActionResultInstance(response);
         }
 
