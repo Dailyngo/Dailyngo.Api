@@ -1,3 +1,4 @@
+using EveryDaily.Application.Services.Jwt;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Entities;
 using EveryDaily.Domain.Enums;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace EveryDaily.Application.Services.Jwt;
+namespace EveryDaily.Application.Middleware;
 
 public class JwtMiddleware
 {

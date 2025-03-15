@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using EveryDaily.Application.Assembly;
 using EveryDaily.Application.Extensions;
+using EveryDaily.Application.Middleware;
 using EveryDaily.Application.Services.Cache;
 using EveryDaily.Application.Services.Jwt;
 using EveryDaily.Core.Settings;
