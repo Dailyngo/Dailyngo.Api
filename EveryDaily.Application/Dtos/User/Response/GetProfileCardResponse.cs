@@ -2,7 +2,6 @@
 {
     public class GetProfileCardResponse
     {
-
         public GetUserResponse GetUserResponse { get; set; }
 
         public int Follower { get; set; }
@@ -12,6 +11,7 @@
 
     public class GetUserResponse
     {
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
+        public string? UserName { get; set; }
     }
 }

@@ -12,7 +12,5 @@ namespace EveryDaily.Application.Dtos.User.Response
         public string Username { get; set; }
 
         public string FullName { get; set; }
-
-
     }
 }

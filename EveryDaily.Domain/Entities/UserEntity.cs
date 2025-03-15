@@ -11,7 +11,5 @@ public class UserEntity : IdentityUser<Guid>, IEntityBase
     public DateTimeOffset? CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
-    public AboutEntity About{ get; set; }
-    public ProfileCardEntity ProfileCard{ get; set; }
-
+    public AboutEntity About { get; set; }
 }
