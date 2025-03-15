@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using EveryDaily.Api.Controllers;
+using EveryDaily.Application.Consumers.ConsumerMessages;
 using EveryDaily.Application.Dtos.Auth.Request;
 using EveryDaily.Application.Dtos.Auth.Response;
 using EveryDaily.Application.Services.Cache;
@@ -11,8 +12,10 @@ using EveryDaily.Application.Services.Jwt;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Core.Settings;
 using EveryDaily.Domain.Entities;
+using EveryDaily.Domain.Prefix.ErrorMessage;
 using EveryDaily.Persistence;
 using EveryDaily.Test.DefaultMoq;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -32,6 +35,8 @@ namespace EveryDaily.Test.Application
         private Mock<SignInManager<UserEntity>> _signInManagerMock;
         private Mock<JwtTokenGenerator> _jwtTokenGeneratorMock;
         private Mock<UserManager<UserEntity>> _userManagerMock;
+        private Mock<IBusControl> _busControlMock;
+        private Mock<ICacheService> _cacheServiceMock;
 
         private LoginCommandHandler _handler;
 
@@ -51,6 +56,11 @@ namespace EveryDaily.Test.Application
                 null, null, null, null);
 
             _jwtTokenGeneratorMock = new Mock<JwtTokenGenerator>(null, null, null, null, _userManagerMock.Object);
+
+            _busControlMock = new Mock<IBusControl>();
+            _cacheServiceMock = new Mock<ICacheService>();
+
+
 
         }
 
@@ -78,11 +88,26 @@ namespace EveryDaily.Test.Application
             _handler = new LoginCommandHandler(
                 appDbContext,
                 _signInManagerMock.Object,
-                _jwtTokenGeneratorMock.Object
+                SetupDefaultMoq.CreateUserManagerMock().Object,
+                _jwtTokenGeneratorMock.Object,
+                Mock.Of<IBusControl>(),
+                Mock.Of<ICacheService>()
             );
 
             await appDbContext.Users.AddAsync(userEntity);
             await appDbContext.SaveChangesAsync();
+
+            _busControlMock
+                .Setup(x => x.Publish(It.IsAny<EmailSendingMessage>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            _cacheServiceMock
+                .Setup(x => x.ExistsAsync(It.IsAny<string>()))
+                .ReturnsAsync(false);
+
+            _cacheServiceMock
+                .Setup(x => x.SetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>()))
+                .Returns(Task.CompletedTask);
 
             _signInManagerMock
                 .Setup(x => x.PasswordSignInAsync(It.IsAny<UserEntity>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
@@ -90,7 +115,7 @@ namespace EveryDaily.Test.Application
 
             _jwtTokenGeneratorMock
                 .Setup(x => x.GenerateToken(It.IsAny<UserEntity>()))
-                .Returns("generated-token");
+                .ReturnsAsync("generated-token");
 
             _jwtTokenGeneratorMock
                 .Setup(x => x.GenerateRefreshToken(It.IsAny<UserEntity>()))
@@ -127,13 +152,28 @@ namespace EveryDaily.Test.Application
             await using var appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
             // Handler oluşturuluyor
             _handler = new LoginCommandHandler(
-                appDbContext,
-                _signInManagerMock.Object,
-                _jwtTokenGeneratorMock.Object
-            );
-         
+                 appDbContext,
+                 _signInManagerMock.Object,
+                 SetupDefaultMoq.CreateUserManagerMock().Object,
+                 _jwtTokenGeneratorMock.Object,
+                 Mock.Of<IBusControl>(),
+                 Mock.Of<ICacheService>()
+             );
+
             await appDbContext.Users.AddAsync(userEntity);
             await appDbContext.SaveChangesAsync();
+
+            _busControlMock
+               .Setup(x => x.Publish(It.IsAny<EmailSendingMessage>(), It.IsAny<CancellationToken>()))
+               .Returns(Task.CompletedTask);
+
+            _cacheServiceMock
+                .Setup(x => x.ExistsAsync(It.IsAny<string>()))
+                .ReturnsAsync(false);
+
+            _cacheServiceMock
+                .Setup(x => x.SetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>()))
+                .Returns(Task.CompletedTask);
 
             _signInManagerMock
                 .Setup(x => x.PasswordSignInAsync(It.IsAny<UserEntity>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
@@ -145,7 +185,7 @@ namespace EveryDaily.Test.Application
             // Assert
             Assert.IsNotNull(result);
             Assert.That(result.StatusCode, Is.EqualTo(400));
-            Assert.AreEqual(result.messages, "Invalid password");
+            Assert.AreEqual(result.messages,AuthErrorMessage.InvalidPassword);
 
 
         }
@@ -171,13 +211,28 @@ namespace EveryDaily.Test.Application
             await using var appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
             // Handler oluşturuluyor
             _handler = new LoginCommandHandler(
-                appDbContext,
-                _signInManagerMock.Object,
-                _jwtTokenGeneratorMock.Object
-            );
+                 appDbContext,
+                 _signInManagerMock.Object,
+                 SetupDefaultMoq.CreateUserManagerMock().Object,
+                 _jwtTokenGeneratorMock.Object,
+                 Mock.Of<IBusControl>(),
+                 Mock.Of<ICacheService>()
+             );
 
             await appDbContext.Users.AddAsync(userEntity);
             await appDbContext.SaveChangesAsync();
+
+            _busControlMock
+               .Setup(x => x.Publish(It.IsAny<EmailSendingMessage>(), It.IsAny<CancellationToken>()))
+               .Returns(Task.CompletedTask);
+
+            _cacheServiceMock
+                .Setup(x => x.ExistsAsync(It.IsAny<string>()))
+                .ReturnsAsync(false);
+
+            _cacheServiceMock
+                .Setup(x => x.SetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>()))
+                .Returns(Task.CompletedTask);
 
             _signInManagerMock
                 .Setup(x => x.PasswordSignInAsync(It.IsAny<UserEntity>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
@@ -189,7 +244,7 @@ namespace EveryDaily.Test.Application
             // Assert
             Assert.IsNotNull(result);
             Assert.That(result.StatusCode, Is.EqualTo(400));
-            Assert.AreEqual(result.messages, "User not found");
+            Assert.AreEqual(result.messages, AuthErrorMessage.UserNotFound);
 
 
 

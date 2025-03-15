@@ -24,7 +24,7 @@ public class JwtTokenGenerator(
     ICacheService cacheService,
     UserManager<UserEntity> userManager)
 {
-    public async Task<string?> GenerateToken(UserEntity user)
+    public virtual async Task<string?> GenerateToken(UserEntity user)
     {
         try
         {
