@@ -22,10 +22,7 @@ public class LoginCommand : IRequest<Core.Dtos.Response<LoginResponse>>
 public class LoginCommandHandler(
     AppDbContext appDbContext,
     SignInManager<UserEntity> signInManager,
-    UserManager<UserEntity> userManager,
-    JwtTokenGenerator jwtTokenGenerator,
-    IBusControl busControl,
-    ICacheService cacheService)
+    JwtTokenGenerator jwtTokenGenerator)
     : IRequestHandler<LoginCommand, Core.Dtos.Response<LoginResponse>>
 {
     public async Task<Core.Dtos.Response<LoginResponse>> Handle(LoginCommand request,
@@ -44,37 +41,12 @@ public class LoginCommandHandler(
 
         var token = await jwtTokenGenerator.GenerateToken(user);
         var refreshToken = await jwtTokenGenerator.GenerateRefreshToken(user);
-
-        var userAboutExist = await appDbContext.Abouts.AnyAsync(x => x.UserId == user.Id, cancellationToken);
-
-
         
-        if (!user.EmailConfirmed)
-        {
-            
-            if(!await cacheService.ExistsAsync(RedisPrefix.GetEmailVerificationKey(user.Id)))
-            {
-                var confirmationToken = await userManager.GenerateTwoFactorTokenAsync(user,TokenOptions.DefaultEmailProvider);
-                await cacheService.SetAsync(RedisPrefix.GetEmailVerificationKey(user.Id), confirmationToken, TimeSpan.FromMinutes(5));
-                await busControl.Publish(new EmailSendingMessage()
-                {
-                    To = user.Email,
-                    Subject = "Dailyngo - Email Confirmation",
-                    Body = $"Please confirm your email verification code: [{confirmationToken}]"
-                },cancellationToken);
-            }
-            
-            
-         
-        }
-
         return Core.Dtos.Response<LoginResponse>.Success(new LoginResponse()
         {
             IsSuccess = true,
             Token = token,
-            RefreshToken = refreshToken,
-            IsEmailConfirmed = user.EmailConfirmed,
-            IsRegistered = userAboutExist
+            RefreshToken = refreshToken
         });
     }
 }

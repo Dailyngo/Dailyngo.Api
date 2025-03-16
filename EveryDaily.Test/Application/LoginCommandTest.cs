@@ -41,7 +41,6 @@ namespace EveryDaily.Tests.Auth
                 Data = new LoginResponse
                 {
                     ErrorMessage = "",
-                    IsRegistered = true,
                     RefreshToken = "refresh",
                     IsSuccess = true,
                     Token = "token",
@@ -130,5 +129,4 @@ namespace EveryDaily.Tests.Auth
             Assert.AreEqual("Invalid password", response.messages);
         }
     }
-
 }
