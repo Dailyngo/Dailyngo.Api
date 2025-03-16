@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 
-namespace EveryDaily.Test.Application;
+namespace EveryDaily.Test.Application.Auth;
 
 [TestFixture]
 public class RegisterCommandHandlerTests
@@ -195,7 +195,7 @@ public class RegisterCommandHandlerTests
 
             Assert.That(result.IsSuccessful, Is.True);
             Assert.That(result.StatusCode, Is.EqualTo(200));
-            
+
         });
 
 

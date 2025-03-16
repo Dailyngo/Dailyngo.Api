@@ -27,7 +27,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
-namespace EveryDaily.Test.Application
+namespace EveryDaily.Test.Application.Auth
 {
     [TestFixture]
     public class LoginCommandHandlerTests

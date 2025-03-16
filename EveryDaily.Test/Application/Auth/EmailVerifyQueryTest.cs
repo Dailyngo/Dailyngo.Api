@@ -17,7 +17,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace EveryDaily.Test.Application
+namespace EveryDaily.Test.Application.Auth
 {
     internal class EmailVerifyQueryTest
     {
@@ -61,7 +61,7 @@ namespace EveryDaily.Test.Application
             _cacheServiceMock.Setup(x => x.DeleteAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
 
             _handler = new EmailVerifyQueryHandler(appDbContext, _cacheServiceMock.Object, _userServiceMock.Object);
-            var result = await _handler.Handle(new EmailVerifyQuery { VerificationCode = "123456" },CancellationToken.None);
+            var result = await _handler.Handle(new EmailVerifyQuery { VerificationCode = "123456" }, CancellationToken.None);
             var user = appDbContext.Users.FirstOrDefault(x => x.Id == userEntity.Id);
 
             Assert.That(result.IsSuccessful, Is.True);
