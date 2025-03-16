@@ -2,6 +2,7 @@ using EveryDaily.Core.Entity;
 using EveryDaily.Core.Settings;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using System.Linq.Expressions;
 
 namespace EveryDaily.Persistence.BaseRepositories;
 
@@ -37,4 +38,9 @@ public abstract class MongoDbRepository<TDocument, TKey> : IMongoDbRepository<TD
     }
 
     public abstract Task DeleteAsync(TKey id);
+
+    public async Task<bool> ExistsAsync(Expression<Func<TDocument, bool>> filter)
+    {
+        return await Collection.Find(filter).AnyAsync();
+    }
 }

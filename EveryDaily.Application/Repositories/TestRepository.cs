@@ -1,12 +1,14 @@
 using EveryDaily.Core.Entity;
 using EveryDaily.Core.Settings;
+using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Persistence.BaseRepositories;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EveryDaily.Application.Repositories;
-public class TestRepository(IOptions<MongoDbSettings> options) : MongoDbRepository<TestModel,ObjectId>(options)
+public class TestRepository(IOptions<MongoDbSettings> options) : MongoDbRepository<TestModel, ObjectId>(options),
+          IMongoDbRepository<TestModel, ObjectId>
 {
     public override async Task<TestModel> GetByIdAsync(ObjectId id)
     {

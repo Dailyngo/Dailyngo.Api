@@ -5,6 +5,7 @@ using EveryDaily.Application.Extensions;
 using EveryDaily.Application.Middleware;
 using EveryDaily.Application.Services.Cache;
 using EveryDaily.Application.Services.Jwt;
+using EveryDaily.Application.Socket;
 using EveryDaily.Core.Settings;
 using EveryDaily.Domain.Entities;
 using EveryDaily.Persistence;
@@ -96,6 +97,7 @@ builder.Services.ConfigureNpgsql(builder.Configuration);
 builder.Services.ConfigureCors(dailyngoCors);
 builder.Services.ConfigureMongoDbRepositories(builder.Configuration);
 builder.Services.ConfigureServices();
+builder.Services.AddSignalR();
 
 #region JWT
 
@@ -159,5 +161,7 @@ app.UseMiddleware<JwtMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapHub<NotificationHub>("/notification-hub");
 
 app.Run();

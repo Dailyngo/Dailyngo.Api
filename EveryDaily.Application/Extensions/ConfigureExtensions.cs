@@ -4,6 +4,8 @@ using EveryDaily.Application.Services.Email;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
 using EveryDaily.Core.Settings;
+using EveryDaily.Domain.Entities.Follow;
+using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Domain.Prefix.RabbitMQ;
 using EveryDaily.Persistence;
 using EveryDaily.Persistence.BaseRepositories;
@@ -91,13 +93,22 @@ public static class ConfigureExtensions
    public static void ConfigureMongoDbRepositories(this IServiceCollection services, IConfiguration configuration)
    {
       services.Configure<MongoDbSettings>(configuration.GetSection("MongoDBConnection"));
-      // asagidaki ornekteki gibi repositoryler eklenebilir.
-      services.AddScoped<MongoDbRepository<TestModel,ObjectId>,TestRepository>();
-   }
+        // asagidaki ornekteki gibi repositoryler eklenebilir.
+
+        // Soyut sýnýflarý DI'ye eklemiyoruz, sadece somut sýnýflarý ekliyoruz
+        services.AddScoped<IMongoDbRepository<NotificationEntity, ObjectId>, NotificationRepository>();
+        services.AddScoped<IMongoDbRepository<FollowRequestEntity, ObjectId>, FollowRequestRepository>();
+        services.AddScoped<IMongoDbRepository<TestModel, ObjectId>, TestRepository>();
+
+        // Her repository ayrýca kendisine özgü sýnýf olarak DI'ye eklenmeli
+        services.AddScoped<NotificationRepository>();
+        services.AddScoped<FollowRequestRepository>();
+        services.AddScoped<TestRepository>();
+    }
    
    public static void ConfigureServices(this IServiceCollection services)
    {
       services.AddTransient<IUserService, UserService>();
       services.AddTransient<IEmailService, EmailService>();
-   }
+    }
 }
