@@ -96,14 +96,7 @@ public static class ConfigureExtensions
         // asagidaki ornekteki gibi repositoryler eklenebilir.
 
         // Soyut sýnýflarý DI'ye eklemiyoruz, sadece somut sýnýflarý ekliyoruz
-        services.AddScoped<IMongoDbRepository<NotificationEntity, ObjectId>, NotificationRepository>();
-        services.AddScoped<IMongoDbRepository<FollowRequestEntity, ObjectId>, FollowRequestRepository>();
-        services.AddScoped<IMongoDbRepository<TestModel, ObjectId>, TestRepository>();
-
-        // Her repository ayrýca kendisine özgü sýnýf olarak DI'ye eklenmeli
-        services.AddScoped<NotificationRepository>();
-        services.AddScoped<FollowRequestRepository>();
-        services.AddScoped<TestRepository>();
+        services.AddScoped<MongoDbRepository<TestModel, ObjectId>, TestRepository>();
     }
    
    public static void ConfigureServices(this IServiceCollection services)
