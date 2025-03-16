@@ -88,10 +88,8 @@ namespace EveryDaily.Test.Application
             _handler = new LoginCommandHandler(
                 appDbContext,
                 _signInManagerMock.Object,
-                SetupDefaultMoq.CreateUserManagerMock().Object,
-                _jwtTokenGeneratorMock.Object,
-                Mock.Of<IBusControl>(),
-                Mock.Of<ICacheService>()
+                _jwtTokenGeneratorMock.Object
+
             );
 
             await appDbContext.Users.AddAsync(userEntity);
@@ -154,10 +152,9 @@ namespace EveryDaily.Test.Application
             _handler = new LoginCommandHandler(
                  appDbContext,
                  _signInManagerMock.Object,
-                 SetupDefaultMoq.CreateUserManagerMock().Object,
-                 _jwtTokenGeneratorMock.Object,
-                 Mock.Of<IBusControl>(),
-                 Mock.Of<ICacheService>()
+                 _jwtTokenGeneratorMock.Object
+
+
              );
 
             await appDbContext.Users.AddAsync(userEntity);
@@ -185,7 +182,7 @@ namespace EveryDaily.Test.Application
             // Assert
             Assert.IsNotNull(result);
             Assert.That(result.StatusCode, Is.EqualTo(400));
-            Assert.AreEqual(result.messages,AuthErrorMessage.InvalidPassword);
+            Assert.AreEqual(result.messages, AuthErrorMessage.InvalidPassword);
 
 
         }
@@ -213,10 +210,8 @@ namespace EveryDaily.Test.Application
             _handler = new LoginCommandHandler(
                  appDbContext,
                  _signInManagerMock.Object,
-                 SetupDefaultMoq.CreateUserManagerMock().Object,
-                 _jwtTokenGeneratorMock.Object,
-                 Mock.Of<IBusControl>(),
-                 Mock.Of<ICacheService>()
+                 _jwtTokenGeneratorMock.Object
+
              );
 
             await appDbContext.Users.AddAsync(userEntity);
