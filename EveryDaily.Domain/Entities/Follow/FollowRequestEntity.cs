@@ -13,8 +13,8 @@ namespace EveryDaily.Domain.Entities.Follow
     public class FollowRequestEntity : IEntityBase<ObjectId>
     {
         public ObjectId Id { get; set; }
-        public Guid SenderId { get; set; }
-        public Guid ReceiverId { get; set; }
+        public string SenderId { get; set; }
+        public string ReceiverId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTimeOffset? UpdatedAt { get ; set ; }
         public bool IsDeleted { get; set; }

@@ -41,8 +41,8 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
             }
 
             var existingRequest = await followRequestRepository.ExistsAsync(
-                f => f.SenderId == userId 
-                && f.ReceiverId == request.ReceiverId);
+                f => f.SenderId == userId.ToString() 
+                && f.ReceiverId == request.ReceiverId.ToString());
 
             if (existingRequest)
             {
@@ -51,16 +51,16 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
 
             var followRequest = new FollowRequestEntity
             {
-                SenderId = userId,
-                ReceiverId = request.ReceiverId
+                SenderId = userId.ToString(),
+                ReceiverId = request.ReceiverId.ToString()
             };
 
             await followRequestRepository.InsertAsync(followRequest);
 
             var notification = new NotificationEntity
             {
-                ReceiverId = request.ReceiverId,
-                SenderId = userId,
+                ReceiverId = request.ReceiverId.ToString(),
+                SenderId = userId.ToString(),
                 Type = NotificationType.Follow,
                 RelatedEntityId = followRequest.Id.ToString(),
                 IsDeleted = false
@@ -73,11 +73,12 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
                 $"{NotificationType.Follow}",TimeSpan.FromDays(1)
             );
 
-            await hubContext.Clients.User(request.ReceiverId.ToString()).SendAsync(
+            await hubContext.Clients.Group(request.ReceiverId.ToString()).SendAsync(
                 NotificationHubMethods.ReceiveNotification,
-                await notificationRepository.CountDocumentsAsync(n => n.ReceiverId == request.ReceiverId && !n.IsRead),
+                await notificationRepository.CountDocumentsAsync(n => n.ReceiverId == request.ReceiverId.ToString() && !n.IsRead),
                 cancellationToken
             );
+
 
             return Response<NoContent>.Success(201);
         }

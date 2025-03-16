@@ -11,7 +11,7 @@ public class TestCreateCommand : IRequest<Response<NoContent>>
     public TestModel TestModel { get; set; }
 }
 
-public class TestCreateCommandHandler (MongoDbRepository<TestModel,ObjectId> testRepository)
+public class TestCreateCommandHandler (IMongoDbRepository<TestModel,ObjectId> testRepository)
     : IRequestHandler<TestCreateCommand, Response<NoContent>>
 {
     public async Task<Response<NoContent>> Handle(TestCreateCommand request, CancellationToken cancellationToken)

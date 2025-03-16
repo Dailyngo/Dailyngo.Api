@@ -28,31 +28,14 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
         {
             var userId = userService.GetUserId();
 
-            List<NotificationEntity> notifications = new();
 
             var redisKey = RedisPrefix.GetUserNotificationsKey(userId);
-            var redisNotifications = await redisService.ListRangeAsync(redisKey);
 
-            if (redisNotifications == null || redisNotifications.Length == 0)
-            {
-                notifications = await notificationRepository
-                    .GetManyAsync(n => n.ReceiverId == userId && !n.IsRead && !n.IsDeleted);
-            }
-            else
-            {
-                notifications = redisNotifications
-                    .Select(n => JsonConvert.DeserializeObject<NotificationEntity>(n))
-                    .Where(n => n != null)
-                    .ToList();
-            }
 
-            var followSenderIds = notifications
-                .Where(n => n.Type == NotificationType.Follow)
-                .Select(n => n.SenderId)
-                .Distinct()
-                .ToList();
+            var notifications = await notificationRepository.GetManyAsync
+                (n => n.ReceiverId == userId.ToString());
 
-            var senderNames = await appDbContext.Users.Where(u=> followSenderIds.Contains(u.Id)).Select(u => new { u.FullName , u.Id }).ToListAsync();   
+            var senderNames = await appDbContext.Users.Where(u=> notifications.Select(x=> Guid.Parse(x.SenderId)).Contains(u.Id)).Select(u => new { u.FullName , u.Id }).ToListAsync();   
 
             var groupedNotifications = new NotificationResponse
             {
@@ -60,8 +43,8 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
                     .Where(n => n.Type == NotificationType.Follow)
                     .Select(n => new FollowNotificationDto
                     {
-                        SenderId = n.SenderId,
-                        SenderName = senderNames.Where(sn=> sn.Id == n.SenderId).Select(sn=> sn.FullName).First(),
+                        SenderId = Guid.Parse(n.SenderId),
+                        SenderName = senderNames.Where(sn=> sn.Id == Guid.Parse(n.SenderId)).Select(sn=> sn.FullName).First(),
                         RelatedEntityId = n.RelatedEntityId
                     })
                     .ToList()
@@ -70,7 +53,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
             if (notifications.Any())
             {
                 var update = Builders<NotificationEntity>.Update.Set(n => n.IsRead, true);
-                await notificationRepository.UpdateManyAsync(n => n.ReceiverId == userId && !n.IsRead, update);
+                await notificationRepository.UpdateManyAsync(n => n.ReceiverId == userId.ToString() && !n.IsRead, update);
             }
 
             await redisService.DeleteAsync(redisKey);

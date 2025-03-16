@@ -11,7 +11,7 @@ public class TestGetAllQuery : IRequest<Response<List<TestModel>>>
 {
 }
 
-public class TestGetAllQueryHandler(MongoDbRepository<TestModel, ObjectId> testRepository)
+public class TestGetAllQueryHandler(IMongoDbRepository<TestModel, ObjectId> testRepository)
     : IRequestHandler<TestGetAllQuery, Response<List<TestModel>>>
 {
     public async Task<Response<List<TestModel>>> Handle(TestGetAllQuery request, CancellationToken cancellationToken)

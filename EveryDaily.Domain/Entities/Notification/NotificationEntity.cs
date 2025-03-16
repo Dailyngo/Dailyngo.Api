@@ -7,8 +7,8 @@ namespace EveryDaily.Domain.Entities.Notification
     public class NotificationEntity : IEntityBase<ObjectId>
     {
         public ObjectId Id { get; set; }
-        public Guid ReceiverId { get; set; }
-        public Guid SenderId { get; set; }
+        public string ReceiverId { get; set; }
+        public string SenderId { get; set; }
         public string? RelatedEntityId { get; set; }
         public NotificationType Type { get; set; }
         public bool IsRead { get; set; } = false;

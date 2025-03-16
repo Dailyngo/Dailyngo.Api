@@ -56,7 +56,7 @@ namespace EveryDaily.Api.Controllers
         /// <summary>
         /// Takip - takipçi kaldırır
         /// </summary>
-        [HttpGet("unfollow")]
+        [HttpPost("unfollow")]
         public async Task<IActionResult> UnFollow([FromBody] UnfollowUserCommand query)
         {
             var result = await mediator.Send(query);
