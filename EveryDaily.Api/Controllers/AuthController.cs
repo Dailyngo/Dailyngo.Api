@@ -60,6 +60,22 @@ public class AuthController(IMediator mediator)
         return CreateActionResultInstance(response);
     }
 
+    [HttpGet("user-login-info")]
+    [CustomAuthorize]
+    public async Task<IActionResult> GetUserLoginInfo()
+    {
+        var response = await mediator.Send(new GetUserLoginInfoQuery());
+        return CreateActionResultInstance(response);
+    }
+    
+    [HttpGet("send-verification-email")]
+    [CustomAuthorize]
+    public async Task<IActionResult> SendVerificationEmail()
+    {
+        var response = await mediator.Send(new SendVerificationEmailCommand());
+        return CreateActionResultInstance(response);
+    }
+    
     [CustomAuthorize]
     [HttpPost("verify-email")]
     public async Task<IActionResult> EmailConfirmation([FromBody] EmailVerifyRequest request)

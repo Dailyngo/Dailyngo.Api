@@ -40,7 +40,6 @@ namespace EveryDaily.Test.Presentation
                 Data = new LoginResponse
                 {
                     ErrorMessage = "",
-                    IsRegistered = true,
                     RefreshToken = "refresh",
                     IsSuccess = true,
                     Token = "token",

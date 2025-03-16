@@ -250,6 +250,5 @@ namespace EveryDaily.Test.Application
 
         }
     }
-
 }
 
