@@ -97,6 +97,8 @@ public static class ConfigureExtensions
 
         // Soyut sýnýflarý DI'ye eklemiyoruz, sadece somut sýnýflarý ekliyoruz
         services.AddScoped<MongoDbRepository<TestModel, ObjectId>, TestRepository>();
+        services.AddScoped<MongoDbRepository<NotificationEntity, ObjectId>, NotificationRepository>();
+        services.AddScoped<MongoDbRepository<FollowRequestEntity, ObjectId>,FollowRequestRepository>();
     }
    
    public static void ConfigureServices(this IServiceCollection services)

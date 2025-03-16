@@ -10,8 +10,7 @@ using MongoDB.Driver;
 
 namespace EveryDaily.Application.Repositories
 {
-    public class FollowRequestRepository(IOptions<MongoDbSettings> options) : MongoDbRepository<FollowRequestEntity, ObjectId>(options),
-          IMongoDbRepository<FollowRequestEntity, ObjectId>
+    public class FollowRequestRepository(IOptions<MongoDbSettings> options) : MongoDbRepository<FollowRequestEntity, ObjectId>(options)
     {
         public override async Task DeleteAsync(ObjectId id)
         {

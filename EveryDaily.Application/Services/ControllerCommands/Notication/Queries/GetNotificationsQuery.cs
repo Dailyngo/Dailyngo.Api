@@ -7,8 +7,10 @@ using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Domain.Prefix.Redis;
 using EveryDaily.Persistence;
+using EveryDaily.Persistence.BaseRepositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 
@@ -19,7 +21,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
     }
     public class GetNotificationsQueryHandler(
         IRedisService redisService,
-        NotificationRepository notificationRepository,
+        MongoDbRepository<NotificationEntity, ObjectId> notificationRepository,
         IUserService userService,
         AppDbContext appDbContext)
         : IRequestHandler<GetNotificationsQuery, Response<NotificationResponse>>
@@ -32,8 +34,8 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
             var redisKey = RedisPrefix.GetUserNotificationsKey(userId);
 
 
-            var notifications = await notificationRepository.GetManyAsync
-                (n => n.ReceiverId == userId.ToString());
+            var notifications = await notificationRepository.Collection.Find(n => n.ReceiverId == userId.ToString()).ToListAsync()
+                ;
 
             var senderNames = await appDbContext.Users.Where(u=> notifications.Select(x=> Guid.Parse(x.SenderId)).Contains(u.Id)).Select(u => new { u.FullName , u.Id }).ToListAsync();   
 
@@ -53,7 +55,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
             if (notifications.Any())
             {
                 var update = Builders<NotificationEntity>.Update.Set(n => n.IsRead, true);
-                await notificationRepository.UpdateManyAsync(n => n.ReceiverId == userId.ToString() && !n.IsRead, update);
+                await notificationRepository.Collection.UpdateManyAsync(n => n.ReceiverId == userId.ToString() && !n.IsRead, update);
             }
 
             await redisService.DeleteAsync(redisKey);

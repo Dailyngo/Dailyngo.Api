@@ -6,7 +6,9 @@ using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Domain.Enums.Fallow;
 using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Persistence;
+using EveryDaily.Persistence.BaseRepositories;
 using MediatR;
+using MongoDB.Bson;
 
 namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
 {
@@ -16,7 +18,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
         public bool IsAccepted { get; set; } // true: kabul, false: reddet
     }
 
-    public class HandleFollowRequestCommandHandler(AppDbContext context, FollowRequestRepository followRequestRepository,IUserService userService)
+    public class HandleFollowRequestCommandHandler(AppDbContext context, MongoDbRepository<FollowRequestEntity,ObjectId> followRequestRepository,IUserService userService)
         : IRequestHandler<HandleFollowRequestCommand, Response<NoContent>>
     {
         public async Task<Response<NoContent>> Handle(HandleFollowRequestCommand request, CancellationToken cancellationToken)

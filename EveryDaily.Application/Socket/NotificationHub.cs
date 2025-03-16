@@ -1,20 +1,23 @@
-﻿using EveryDaily.Application.Repositories;
-using EveryDaily.Application.Services.Cache;
-using EveryDaily.Application.Services.UserService;
+﻿using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
+using EveryDaily.Domain.Entities.Follow;
+using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Domain.Prefix.Redis;
 using EveryDaily.Domain.Prefix.Socket;
+using EveryDaily.Persistence.BaseRepositories;
 using Microsoft.AspNetCore.SignalR;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace EveryDaily.Application.Socket
 {
     public class NotificationHub : Hub
     {
-        private readonly NotificationRepository _notificationRepository;
+        private readonly MongoDbRepository<NotificationEntity, ObjectId> _notificationRepository;
         private readonly IRedisService _redisService;
         private readonly IUserService _userService;
 
-        public NotificationHub(IRedisService redisService, IUserService userService, NotificationRepository notificationRepository)
+        public NotificationHub(IRedisService redisService, IUserService userService, MongoDbRepository<NotificationEntity, ObjectId> notificationRepository)
         {
             _redisService = redisService;
             _userService = userService;
@@ -67,8 +70,7 @@ namespace EveryDaily.Application.Socket
             }
             else
             {
-                // MongoDB'deki okunmamış bildirimlerin sayısını al
-                totalNotificationCount = await _notificationRepository
+                totalNotificationCount = await _notificationRepository.Collection
                     .CountDocumentsAsync(n => n.ReceiverId == userId && !n.IsRead && !n.IsDeleted);
             }
 

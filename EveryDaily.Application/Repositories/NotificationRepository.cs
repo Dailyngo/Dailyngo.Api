@@ -8,8 +8,7 @@ using System.Linq.Expressions;
 
 namespace EveryDaily.Application.Repositories
 {
-    public class NotificationRepository(IOptions<MongoDbSettings> options) : MongoDbRepository<NotificationEntity, ObjectId>(options),
-          IMongoDbRepository<NotificationEntity, ObjectId>
+    public class NotificationRepository(IOptions<MongoDbSettings> options) : MongoDbRepository<NotificationEntity, ObjectId>(options)
     {
         /// <summary>
         /// Yeni bir bildirimi ekler.

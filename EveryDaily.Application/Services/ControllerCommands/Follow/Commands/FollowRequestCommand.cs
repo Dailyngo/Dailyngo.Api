@@ -1,20 +1,18 @@
-﻿using EveryDaily.Application.Repositories;
-using EveryDaily.Application.Services.Cache;
-using EveryDaily.Application.Services.UserService;
+﻿using EveryDaily.Application.Services.UserService;
 using EveryDaily.Application.Socket;
 using EveryDaily.Core;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Entities.Follow;
 using EveryDaily.Domain.Entities.Notification;
-using EveryDaily.Domain.Enums.Fallow;
 using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Domain.Prefix.Redis;
 using EveryDaily.Domain.Prefix.Socket;
+using EveryDaily.Persistence.BaseRepositories;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
+using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
 {
@@ -26,8 +24,8 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
     public class FollowRequestCommandHandler(
         IRedisService redisService,
         IHubContext<NotificationHub> hubContext,
-        NotificationRepository notificationRepository,
-        FollowRequestRepository followRequestRepository,
+        MongoDbRepository<NotificationEntity, ObjectId>  notificationRepository,
+        MongoDbRepository<FollowRequestEntity, ObjectId> followRequestRepository,
         IUserService userService)
         : IRequestHandler<FollowRequestCommand, Response<NoContent>>
     {
@@ -66,7 +64,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
                 IsDeleted = false
             };
 
-            await notificationRepository.InsertOneAsync(notification, cancellationToken);
+            await notificationRepository.Collection.InsertOneAsync(notification, cancellationToken);
 
             await redisService.ListLeftPushAsync(
                 RedisPrefix.GetUserNotificationsKey(request.ReceiverId),
@@ -75,7 +73,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
 
             await hubContext.Clients.Group(request.ReceiverId.ToString()).SendAsync(
                 NotificationHubMethods.ReceiveNotification,
-                await notificationRepository.CountDocumentsAsync(n => n.ReceiverId == request.ReceiverId.ToString() && !n.IsRead),
+                await notificationRepository.Collection.CountDocumentsAsync(n => n.ReceiverId == request.ReceiverId.ToString() && !n.IsRead),
                 cancellationToken
             );
 

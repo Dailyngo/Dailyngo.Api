@@ -10,7 +10,7 @@ public abstract class MongoDbRepository<TDocument, TKey> : IMongoDbRepository<TD
     where TDocument : IEntityBase<TKey>
     where TKey : struct
 {
-    protected readonly IMongoCollection<TDocument> Collection;
+    public readonly IMongoCollection<TDocument> Collection;
 
     protected MongoDbRepository(IOptions<MongoDbSettings> options)
     {
