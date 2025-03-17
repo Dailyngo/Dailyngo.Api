@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace EveryDaily.Test.Application.User
 {
-    internal class SearchUsersTest
+    internal class SearchUsersQueryTest
     {
         private Mock<UserManager<UserEntity>> _userManagerMock;
         private SearchUsersQueryHandler _handler;
