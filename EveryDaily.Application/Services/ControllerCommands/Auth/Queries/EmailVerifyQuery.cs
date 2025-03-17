@@ -1,3 +1,5 @@
+using System.Text.Json;
+using EveryDaily.Application.Dtos.Auth;
 using EveryDaily.Application.Services.Cache;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
@@ -25,12 +27,14 @@ public class EmailVerifyQueryHandler(AppDbContext appDbContext, ICacheService ca
         if (user == null)
             return Response<NoContent>.Fail(AuthErrorMessage.UserNotFound);
         
-        var verifyCode = await cacheService.GetAsync(RedisPrefix.GetEmailVerificationKey(userId));
+        var confirmationStr = await cacheService.GetAsync(RedisPrefix.GetEmailVerificationKey(userId));
         
-        if(string.IsNullOrEmpty(verifyCode))
+        if(string.IsNullOrEmpty(confirmationStr))
             return Response<NoContent>.Fail(AuthErrorMessage.EmailVerificationCodeNotFound); // todo duzeltilecek
         
-        if (verifyCode != request.VerificationCode)
+        var confirmation = JsonSerializer.Deserialize<ConfirmEmailDto>(confirmationStr);
+        
+        if (confirmation?.ConfirmatinToken != request.VerificationCode)
             return Response<NoContent>.Fail(AuthErrorMessage.EmailVerificationCodeNotMatch);
 
         user.EmailConfirmed = true;
@@ -39,4 +43,5 @@ public class EmailVerifyQueryHandler(AppDbContext appDbContext, ICacheService ca
         
         return Response<NoContent>.Success(200);
     }
+    
 }

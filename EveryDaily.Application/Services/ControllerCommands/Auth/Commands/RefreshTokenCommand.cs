@@ -42,7 +42,7 @@ public class RefreshTokenHandler(
             var refreshToken = await jwtTokenGenerator.GenerateRefreshToken(user);
 
             return Response<LoginResponse>.Success(new LoginResponse
-                { IsSuccess = true, Token = token, RefreshToken = refreshToken, IsRegistered = true });
+                { IsSuccess = true, Token = token, RefreshToken = refreshToken});
         }
         catch (Exception ex)
         {
