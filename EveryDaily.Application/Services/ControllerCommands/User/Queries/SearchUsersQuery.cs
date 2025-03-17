@@ -21,6 +21,10 @@ namespace EveryDaily.Application.Services.ControllerCommands.User.Queries
     {
         public async Task<Response<List<SearchUserResponse>>> Handle(SearchUsersQuery request, CancellationToken cancellationToken)
         {
+            if(string.IsNullOrEmpty(request.SearchTerm))
+            {
+                return Response<List<SearchUserResponse>>.Success(new List<SearchUserResponse>());
+            }
             var searchTerm = request.SearchTerm.ToLower();
 
             var response = await appDbContext.Users
