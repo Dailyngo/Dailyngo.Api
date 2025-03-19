@@ -6,6 +6,7 @@ using EveryDaily.Core;
 using EveryDaily.Core.Settings;
 using EveryDaily.Domain.Entities.Follow;
 using EveryDaily.Domain.Entities.Notification;
+using EveryDaily.Domain.Documents;
 using EveryDaily.Domain.Prefix.RabbitMQ;
 using EveryDaily.Persistence;
 using EveryDaily.Persistence.BaseRepositories;
@@ -93,9 +94,11 @@ public static class ConfigureExtensions
    public static void ConfigureMongoDbRepositories(this IServiceCollection services, IConfiguration configuration)
    {
       services.Configure<MongoDbSettings>(configuration.GetSection("MongoDBConnection"));
+      services.AddScoped<MongoDocContext>(opt => new MongoDocContext(opt.GetRequiredService<IOptions<MongoDbSettings>>()));
+   
         // asagidaki ornekteki gibi repositoryler eklenebilir.
 
-        // Soyut sýnýflarý DI'ye eklemiyoruz, sadece somut sýnýflarý ekliyoruz
+        // Soyut sï¿½nï¿½flarï¿½ DI'ye eklemiyoruz, sadece somut sï¿½nï¿½flarï¿½ ekliyoruz
         services.AddScoped<MongoDbRepository<TestModel, ObjectId>, TestRepository>();
         services.AddScoped<MongoDbRepository<NotificationEntity, ObjectId>, NotificationRepository>();
         services.AddScoped<MongoDbRepository<FollowRequestEntity, ObjectId>,FollowRequestRepository>();
