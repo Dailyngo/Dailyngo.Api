@@ -4,7 +4,7 @@ using EveryDaily.Domain.Entities.Follow;
 using EveryDaily.Domain.Entities.Notification;
 using Microsoft.Extensions.Options;
 
-namespace EveryDaily.Persistence.BaseRepositories;
+namespace EveryDaily.Persistence.MongoContext;
 
 public class MongoDocContext(IOptions<MongoDbSettings> options) 
     : MongoDocContextFactory(options)

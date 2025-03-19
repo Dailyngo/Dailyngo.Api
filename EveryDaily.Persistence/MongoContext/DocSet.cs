@@ -1,10 +1,11 @@
 using EveryDaily.Core.Entity;
 using EveryDaily.Core.Settings;
+using EveryDaily.Domain.Documents;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace EveryDaily.Persistence.BaseRepositories;
+namespace EveryDaily.Persistence.MongoContext;
 
 public sealed class DocSet<TDocument> where TDocument : IEntityBase<ObjectId>
 {

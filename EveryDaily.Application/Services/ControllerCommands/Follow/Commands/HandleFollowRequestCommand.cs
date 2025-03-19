@@ -2,7 +2,7 @@
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Entities.Follow;
 using EveryDaily.Persistence;
-using EveryDaily.Persistence.BaseRepositories;
+using EveryDaily.Persistence.MongoContext;
 using MediatR;
 using MongoDB.Bson;
 using MongoDB.Driver;

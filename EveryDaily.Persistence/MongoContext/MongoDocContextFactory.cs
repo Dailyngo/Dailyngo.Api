@@ -3,7 +3,7 @@ using EveryDaily.Core.Settings;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 
-namespace EveryDaily.Persistence.BaseRepositories;
+namespace EveryDaily.Persistence.MongoContext;
 
 public abstract class MongoDocContextFactory(IOptions<MongoDbSettings> options)
 {

@@ -7,7 +7,7 @@ using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Domain.Prefix.Redis;
 using EveryDaily.Domain.Prefix.Socket;
-using EveryDaily.Persistence.BaseRepositories;
+using EveryDaily.Persistence.MongoContext;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using MongoDB.Driver;

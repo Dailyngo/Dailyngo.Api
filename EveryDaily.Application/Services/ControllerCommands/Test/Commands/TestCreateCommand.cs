@@ -1,8 +1,7 @@
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Documents;
-using EveryDaily.Persistence.BaseRepositories;
+using EveryDaily.Persistence.MongoContext;
 using MediatR;
-using MongoDB.Driver;
 
 namespace EveryDaily.Application.Services.ControllerCommands.Test.Commands;
 

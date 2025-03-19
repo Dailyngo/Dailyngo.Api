@@ -3,17 +3,14 @@ using EveryDaily.Application.Services.Email;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
 using EveryDaily.Core.Settings;
-using EveryDaily.Domain.Entities.Follow;
-using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Domain.Prefix.RabbitMQ;
 using EveryDaily.Persistence;
-using EveryDaily.Persistence.BaseRepositories;
+using EveryDaily.Persistence.MongoContext;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 
 namespace EveryDaily.Application.Extensions;
 

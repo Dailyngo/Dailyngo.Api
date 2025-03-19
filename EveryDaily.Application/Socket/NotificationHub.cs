@@ -1,12 +1,9 @@
 ﻿using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
-using EveryDaily.Domain.Entities.Follow;
-using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Domain.Prefix.Redis;
 using EveryDaily.Domain.Prefix.Socket;
-using EveryDaily.Persistence.BaseRepositories;
+using EveryDaily.Persistence.MongoContext;
 using Microsoft.AspNetCore.SignalR;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EveryDaily.Application.Socket
