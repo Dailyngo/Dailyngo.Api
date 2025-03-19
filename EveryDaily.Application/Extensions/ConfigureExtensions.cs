@@ -4,6 +4,7 @@ using EveryDaily.Application.Services.Email;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
 using EveryDaily.Core.Settings;
+using EveryDaily.Domain.Documents;
 using EveryDaily.Domain.Prefix.RabbitMQ;
 using EveryDaily.Persistence;
 using EveryDaily.Persistence.BaseRepositories;
@@ -91,8 +92,7 @@ public static class ConfigureExtensions
    public static void ConfigureMongoDbRepositories(this IServiceCollection services, IConfiguration configuration)
    {
       services.Configure<MongoDbSettings>(configuration.GetSection("MongoDBConnection"));
-      // asagidaki ornekteki gibi repositoryler eklenebilir.
-      services.AddScoped<MongoDbRepository<TestModel,ObjectId>,TestRepository>();
+      services.AddScoped<MongoDocContext>(opt => new MongoDocContext(opt.GetRequiredService<IOptions<MongoDbSettings>>()));
    }
    
    public static void ConfigureServices(this IServiceCollection services)
