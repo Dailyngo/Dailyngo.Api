@@ -1,11 +1,8 @@
-using EveryDaily.Application.Repositories;
 using EveryDaily.Application.Services.ControllerCommands.Test.Commands;
 using EveryDaily.Application.Services.ControllerCommands.Test.Queries;
 using EveryDaily.Core.ControllerBases;
 using EveryDaily.Domain.Documents;
-using EveryDaily.Persistence.BaseRepositories;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EveryDaily.Api.Controllers;

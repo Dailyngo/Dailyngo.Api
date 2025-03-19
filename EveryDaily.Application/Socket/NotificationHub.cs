@@ -13,15 +13,15 @@ namespace EveryDaily.Application.Socket
 {
     public class NotificationHub : Hub
     {
-        private readonly MongoDbRepository<NotificationEntity, ObjectId> _notificationRepository;
+        private readonly MongoDocContext _mongoDocContext;
         private readonly IRedisService _redisService;
         private readonly IUserService _userService;
 
-        public NotificationHub(IRedisService redisService, IUserService userService, MongoDbRepository<NotificationEntity, ObjectId> notificationRepository)
+        public NotificationHub(IRedisService redisService, IUserService userService, MongoDocContext mongoDocContext)
         {
             _redisService = redisService;
             _userService = userService;
-            _notificationRepository = notificationRepository;
+            _mongoDocContext = mongoDocContext;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace EveryDaily.Application.Socket
             }
             else
             {
-                totalNotificationCount = await _notificationRepository.Collection
+                totalNotificationCount = await _mongoDocContext.Notifications.Collection
                     .CountDocumentsAsync(n => n.ReceiverId == userId && !n.IsRead && !n.IsDeleted);
             }
 

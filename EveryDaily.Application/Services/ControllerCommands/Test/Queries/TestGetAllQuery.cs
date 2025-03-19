@@ -1,10 +1,7 @@
-using EveryDaily.Application.Repositories;
-using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Documents;
 using EveryDaily.Persistence.BaseRepositories;
 using MediatR;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EveryDaily.Application.Services.ControllerCommands.Test.Queries;

@@ -10,9 +10,7 @@ using EveryDaily.Domain.Prefix.Socket;
 using EveryDaily.Persistence.BaseRepositories;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
-using MongoDB.Bson;
 using MongoDB.Driver;
-
 
 namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
 {
@@ -24,8 +22,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
     public class FollowRequestCommandHandler(
         IRedisService redisService,
         IHubContext<NotificationHub> hubContext,
-        MongoDbRepository<NotificationEntity, ObjectId>  notificationRepository,
-        MongoDbRepository<FollowRequestEntity, ObjectId> followRequestRepository,
+        MongoDocContext mongoDocContext,
         IUserService userService)
         : IRequestHandler<FollowRequestCommand, Response<NoContent>>
     {
@@ -38,9 +35,9 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
                 return Response<NoContent>.Fail("Kendini takip etmek istiyorsan aynaya bak :)");
             }
 
-            var existingRequest = await followRequestRepository.ExistsAsync(
-                f => f.SenderId == userId.ToString() 
-                && f.ReceiverId == request.ReceiverId.ToString());
+            var existingRequest = await mongoDocContext.FollowRequests.Collection.Find(
+                f => f.SenderId == userId.ToString()
+                     && f.ReceiverId == request.ReceiverId.ToString()).AnyAsync(cancellationToken);
 
             if (existingRequest)
             {
@@ -53,7 +50,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
                 ReceiverId = request.ReceiverId.ToString()
             };
 
-            await followRequestRepository.InsertAsync(followRequest);
+            await mongoDocContext.FollowRequests.Collection.InsertOneAsync(followRequest, new(), cancellationToken);
 
             var notification = new NotificationEntity
             {
@@ -64,16 +61,17 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
                 IsDeleted = false
             };
 
-            await notificationRepository.Collection.InsertOneAsync(notification, cancellationToken);
+            await mongoDocContext.Notifications.Collection.InsertOneAsync(notification, new(), cancellationToken);
 
             await redisService.ListLeftPushAsync(
                 RedisPrefix.GetUserNotificationsKey(request.ReceiverId),
-                $"{NotificationType.Follow}",TimeSpan.FromDays(1)
+                $"{NotificationType.Follow}", TimeSpan.FromDays(1)
             );
 
             await hubContext.Clients.Group(request.ReceiverId.ToString()).SendAsync(
                 NotificationHubMethods.ReceiveNotification,
-                await notificationRepository.Collection.CountDocumentsAsync(n => n.ReceiverId == request.ReceiverId.ToString() && !n.IsRead),
+                await mongoDocContext.Notifications.Collection.CountDocumentsAsync(
+                    n => n.ReceiverId == request.ReceiverId.ToString() && !n.IsRead, new(), cancellationToken),
                 cancellationToken
             );
 
@@ -81,5 +79,4 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
             return Response<NoContent>.Success(201);
         }
     }
-
 }
