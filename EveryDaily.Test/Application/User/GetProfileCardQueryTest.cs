@@ -124,6 +124,5 @@ namespace EveryDaily.Test.Application.User
                 Assert.AreEqual(result.messages, UserErrorMessage.ProfileDetailNotFound);
             });
         }
--
     }
 }
