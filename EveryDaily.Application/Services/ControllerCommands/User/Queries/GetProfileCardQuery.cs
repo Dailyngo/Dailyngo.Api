@@ -1,4 +1,6 @@
-﻿using EveryDaily.Application.Dtos.User.Response;
+﻿using EveryDaily.Application.Dtos.Follow;
+using EveryDaily.Application.Dtos.User.Response;
+using EveryDaily.Application.Services.ControllerQueries.Follow.Queries;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Prefix.ErrorMessage;
@@ -28,11 +30,13 @@ namespace EveryDaily.Application.Services.ControllerCommands.User.Queries
                 return Response<GetProfileCardResponse>.Fail(UserErrorMessage.ProfileDetailNotFound);
             }
 
+            var followersCount = await appDbContext.Follows.CountAsync(f => f.FollowingId == userID, cancellationToken);
+            var followingCount = await appDbContext.Follows.CountAsync(f => f.FollowerId == userID, cancellationToken);
+
             var response = new GetProfileCardResponse
             {
-                Follower = 244,
-                FollowUp = 300,
-                PostCount = 120,
+                Follower = followersCount,
+                FollowUp = followingCount,
                 GetUserResponse = new GetUserResponse
                 {
                     FullName = user.FullName,
