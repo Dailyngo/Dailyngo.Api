@@ -27,7 +27,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
-namespace EveryDaily.Test.Application.Auth
+namespace EveryDaily.Test.Application.Auth.Commands
 {
     [TestFixture]
     public class LoginCommandHandlerTests
@@ -43,12 +43,8 @@ namespace EveryDaily.Test.Application.Auth
         [SetUp]
         public void SetUp()
         {
-            // Mock'lar oluşturuluyor
-
-            // UserManager mock'lama
             _userManagerMock = SetupDefaultMoq.CreateUserManagerMock();
 
-            // SignInManager mock'lama
             _signInManagerMock = new Mock<SignInManager<UserEntity>>(
                 _userManagerMock.Object,
                 Mock.Of<IHttpContextAccessor>(),
@@ -148,7 +144,7 @@ namespace EveryDaily.Test.Application.Auth
             };
 
             await using var appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
-            // Handler oluşturuluyor
+
             _handler = new LoginCommandHandler(
                  appDbContext,
                  _signInManagerMock.Object,
@@ -176,10 +172,9 @@ namespace EveryDaily.Test.Application.Auth
                 .Setup(x => x.PasswordSignInAsync(It.IsAny<UserEntity>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Failed);
 
-            // Act
+
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.That(result.StatusCode, Is.EqualTo(400));
             Assert.AreEqual(result.messages, AuthErrorMessage.InvalidPassword);
@@ -206,7 +201,7 @@ namespace EveryDaily.Test.Application.Auth
             };
 
             await using var appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
-            // Handler oluşturuluyor
+
             _handler = new LoginCommandHandler(
                  appDbContext,
                  _signInManagerMock.Object,
@@ -233,10 +228,9 @@ namespace EveryDaily.Test.Application.Auth
                 .Setup(x => x.PasswordSignInAsync(It.IsAny<UserEntity>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success);
 
-            // Act
+
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.That(result.StatusCode, Is.EqualTo(400));
             Assert.AreEqual(result.messages, AuthErrorMessage.UserNotFound);

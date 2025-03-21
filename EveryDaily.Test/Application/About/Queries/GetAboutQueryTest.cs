@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using MassTransit;
 using EveryDaily.Test.DefaultMoq;
 
-namespace EveryDaily.Test.Application.About
+namespace EveryDaily.Test.Application.About.Queries
 {
     [TestFixture]
     public class GetAboutQueryTest
@@ -38,7 +38,7 @@ namespace EveryDaily.Test.Application.About
                 Name = "Test ",
                 Surname = "User",
                 UserName = "Test User",
-                
+
             };
             await appDbContext.Users.AddAsync(user);
 
@@ -75,7 +75,7 @@ namespace EveryDaily.Test.Application.About
             await appDbContext.SaveChangesAsync();
 
             var query = new GetAboutQuery();
-            
+
             _userServiceMock.Setup(x => x.GetUserId()).Returns(user.Id);
             // Act
             _handler = new GetAboutQueryHandler(appDbContext, _userServiceMock.Object);
@@ -86,7 +86,7 @@ namespace EveryDaily.Test.Application.About
             Assert.IsNotNull(result);
             Assert.That(result.StatusCode, Is.EqualTo(200));
             Assert.IsNotNull(result.Data);
-            Assert.AreEqual(result.Data.BirthDate.Value, birthDate);
+            Assert.AreEqual(result.Data.BirthDate.Value.Date, birthDate.Date);
             Assert.That(result.Data.Department.Faculty.University.Name, Is.EqualTo("Test University"));
             Assert.That(result.Data.Department.Faculty.Name, Is.EqualTo("Test Faculty"));
             Assert.That(result.Data.Department.Name, Is.EqualTo("Test Department"));

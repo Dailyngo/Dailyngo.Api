@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 
-namespace EveryDaily.Test.Application.Auth;
+namespace EveryDaily.Test.Application.Auth.Commands;
 
 [TestFixture]
 public class RegisterCommandHandlerTests
@@ -27,17 +27,13 @@ public class RegisterCommandHandlerTests
     [SetUp]
     public void Setup()
     {
-
-        // Mock UserManager
         _userManagerMock = SetupDefaultMoq.CreateUserManagerMock();
-
-
     }
 
     [Test]
     public async Task Handle_EmailDomainInvalid_ReturnsFailureWithMessage()
     {
-        // Arrange
+
         var request = new RegisterRequest
         {
             Email = "user@example.com",
@@ -50,11 +46,11 @@ public class RegisterCommandHandlerTests
         var command = new RegisterCommand { Data = request };
 
         await using var _appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
+
         _handler = new RegisterCommandHandler(_appDbContext, _userManagerMock.Object);
-        // Act
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccessful, Is.False);
@@ -65,7 +61,7 @@ public class RegisterCommandHandlerTests
     [Test]
     public async Task Handle_InvalidEmailFormat_ReturnsFailureWithMessage()
     {
-        // Arrange
+
         var request = new RegisterRequest
         {
             Email = "invalid-email.edu.tr",
@@ -79,10 +75,10 @@ public class RegisterCommandHandlerTests
 
         await using var _appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
         _handler = new RegisterCommandHandler(_appDbContext, _userManagerMock.Object);
-        // Act
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
+
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccessful, Is.False);
@@ -93,7 +89,7 @@ public class RegisterCommandHandlerTests
     [Test]
     public async Task Handle_PasswordsDoNotMatch_ReturnsFailureWithMessage()
     {
-        // Arrange
+
         var request = new RegisterRequest
         {
             Email = "valid@edu.tr",
@@ -107,10 +103,9 @@ public class RegisterCommandHandlerTests
 
         await using var _appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
         _handler = new RegisterCommandHandler(_appDbContext, _userManagerMock.Object);
-        // Act
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccessful, Is.False);
@@ -137,7 +132,7 @@ public class RegisterCommandHandlerTests
         await _appDbContext.SaveChangesAsync();
 
         _handler = new RegisterCommandHandler(_appDbContext, _userManagerMock.Object);
-        // Arrange
+
         var request = new RegisterRequest
         {
             Email = "valid@edu.tr",
@@ -149,12 +144,8 @@ public class RegisterCommandHandlerTests
         };
         var command = new RegisterCommand { Data = request };
 
-
-
-        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccessful, Is.False);
@@ -167,7 +158,6 @@ public class RegisterCommandHandlerTests
     public async Task Handle_ValidRequest_ReturnsSuccess()
     {
 
-        // Arrange
         var request = new RegisterRequest
         {
             Email = "valid@edu.tr",
@@ -186,10 +176,9 @@ public class RegisterCommandHandlerTests
 
         await using var _appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
         _handler = new RegisterCommandHandler(_appDbContext, _userManagerMock.Object);
-        // Act
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         Assert.Multiple(() =>
         {
 

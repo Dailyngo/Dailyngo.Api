@@ -91,7 +91,7 @@ public class JwtTokenGenerator(
         return token;
     }
 
-    public async Task<ValidateTokenResult> VerifyToken(string token, JwtTokenType tokenType)
+    public virtual async Task<ValidateTokenResult> VerifyToken(string token, JwtTokenType tokenType)
     {
         if (string.IsNullOrEmpty(token))
             return new ValidateTokenResult(false, "Please provide a valid token!");
@@ -150,7 +150,7 @@ public class JwtTokenGenerator(
         };
     }
 
-    public string? GetClaim(string token, string claimType)
+    public virtual string? GetClaim(string token, string claimType)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
 

@@ -17,7 +17,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace EveryDaily.Test.Application.Auth
+namespace EveryDaily.Test.Application.Auth.Queries
 {
     internal class EmailVerifyQueryTest
     {

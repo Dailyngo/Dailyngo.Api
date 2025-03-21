@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EveryDaily.Test.Application.About
+namespace EveryDaily.Test.Application.About.Queries
 {
     internal class GetOtherUserAboutQueryTest
     {
