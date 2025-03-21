@@ -158,10 +158,28 @@ namespace EveryDaily.Test.Application.Auth.Queries
             var result = await handler.Handle(new GetUserLoginInfoQuery(), CancellationToken.None);
 
             Assert.True(result.IsSuccessful);
+            Assert.IsNotNull(result.Data);
+            Assert.AreEqual(true,result.Data.IsEmailConfirmed);
             Assert.AreEqual(200, result.StatusCode);
 
         }
 
-       
+        [Test]
+        public async Task Handle_UserNotFound_Returns404()
+        {
+            var appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
+
+            _userServiceMock.Setup(x => x.GetUserId()).Returns(Guid.NewGuid);
+
+            var handler = new GetUserLoginInfoQueryHandler(appDbContext, _userServiceMock.Object);
+            var result = await handler.Handle(new GetUserLoginInfoQuery(), CancellationToken.None);
+
+            Assert.False(result.IsSuccessful);
+            Assert.IsNull(result.Data);
+            Assert.AreEqual(404, result.StatusCode);
+
+        }
+
+
     }
 }

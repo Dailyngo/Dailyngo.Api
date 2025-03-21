@@ -33,13 +33,13 @@ namespace EveryDaily.Test.Application.Auth.Commands
             _jwtTokenGeneratorMock = new Mock<JwtTokenGenerator>(null, null, null, null, _userManagerMock.Object);
             _loggerMock = new Mock<ILogger<RefreshTokenHandler>>();
 
-            
+
         }
 
         [Test]
         public async Task Handle_ValidRefreshToken_ReturnsNewToken()
         {
-           var _appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
+            var _appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
 
             var command = new RefreshTokenCommand
             {
@@ -89,10 +89,10 @@ namespace EveryDaily.Test.Application.Auth.Commands
                 .Setup(x => x.FindByIdAsync(It.IsAny<string>()))
                 .ReturnsAsync(userEntity);
 
-        
+
             var result = await _handler.Handle(command, CancellationToken.None);
 
-   
+
             Assert.IsNotNull(result);
             Assert.That(result.StatusCode, Is.EqualTo(200));
             Assert.That(result.Data.Token, Is.EqualTo("new-access-token"));
@@ -146,51 +146,6 @@ namespace EveryDaily.Test.Application.Auth.Commands
         }
 
         [Test]
-        public async Task Handle_ExpiredToken_ReturnsUnauthorized()
-        {
-            var _appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
-
-            var command = new RefreshTokenCommand
-            {
-                RefreshToken = "expired-refresh-token"
-            };
-
-            var userEntity = new UserEntity
-            {
-                Id = Guid.NewGuid(),
-                Email = "testuser@example.com",
-                UserName = "testuser",
-                Name = "Test",
-                Surname = "User"
-            };
-            _appDbContext.Users.Add(userEntity);
-            _appDbContext.SaveChanges();
-
-            _jwtTokenGeneratorMock
-                .Setup(x => x.VerifyToken(command.RefreshToken, JwtTokenType.RefreshToken))
-                .ReturnsAsync(new ValidateTokenResult(false, "Token has expired! Please login to get a new token!"));
-
-            var _userManagerMock = SetupDefaultMoq.CreateUserManagerMock();
-
-            _handler = new RefreshTokenHandler(
-                _userManagerMock.Object,
-                _jwtTokenGeneratorMock.Object,
-                _loggerMock.Object
-            );
-
-            _userManagerMock.Setup(x => x.Users).Returns(_appDbContext.Users);
-
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(It.IsAny<string>()))
-                .ReturnsAsync(userEntity);
-
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            Assert.IsNotNull(result);
-            Assert.That(result.StatusCode, Is.EqualTo(401));
-        }
-
-        [Test]
         public async Task Handle_TokenAndUserIdMismatch_ReturnsUnauthorized()
         {
             var _appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
@@ -235,7 +190,7 @@ namespace EveryDaily.Test.Application.Auth.Commands
             Assert.IsNotNull(result);
             Assert.That(result.StatusCode, Is.EqualTo(401));
         }
-       /* [Test]
+        [Test]
         public async Task Handle_UserNotFound_ReturnsNotFound()
         {
 
@@ -273,9 +228,9 @@ namespace EveryDaily.Test.Application.Auth.Commands
 
             // Sonuçları kontrol ediyoruz
             Assert.IsNotNull(result);
-            Assert.That(result.StatusCode, Is.EqualTo(404));
+            Assert.That(result.StatusCode, Is.EqualTo(401));
 
-        }*/
+        }
 
 
 

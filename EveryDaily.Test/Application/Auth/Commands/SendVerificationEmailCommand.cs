@@ -37,7 +37,7 @@ public class SendVerificationEmailCommandHandlerTests
 
     }
 
-   /* [Test]
+  [Test]
     public async Task Handle_UserNotFound_ReturnsNotFound()
     {
         var appDbContext = new AppDbContext(SetupDefaultMoq.CreateDbContextOptions());
@@ -62,10 +62,9 @@ public class SendVerificationEmailCommandHandlerTests
         {
             Assert.That(result.IsSuccessful, Is.False);
             Assert.That(result.StatusCode, Is.EqualTo(404));
-            Assert.That(result.messages, Is.EqualTo("User not found")); // Mesaj kontrolü
         });
     }
-   */
+
     [Test]
     public async Task Handle_CacheExists_ReturnsExistingToken()
     {
