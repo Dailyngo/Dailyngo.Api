@@ -15,6 +15,12 @@ public interface IRedisService
     Task PublishSubscriberAsync(string subject, SubMessage message);
     Task PublishSubscriberAsync(string subject, string message);
     Task SubscribeAsync(string subject, Action<RedisChannel, RedisValue> handler);
+    Task ListLeftPushAsync(string key, string value, TimeSpan? expiration = null);
+    Task ListRightPushAsync(string key, string value, TimeSpan? expiration = null);
+    Task<RedisValue[]> ListRangeAsync(string key, int start = 0, int stop = -1);
+    Task<string?> ListLeftPopAsync(string key);
+    Task<string?> ListRightPopAsync(string key);
+    Task<long> ListLengthAsync(string key);
 }
 
 public class RedisService : IRedisService
@@ -83,5 +89,59 @@ public class RedisService : IRedisService
     {
         var sub = Redis.GetSubscriber();
         await sub.SubscribeAsync(RedisChannel.Literal(subject), handler);
+    }
+    /// <summary>
+    /// Yeni eleman baþa eklenir
+    /// </summary>
+    public async Task ListLeftPushAsync(string key, string value, TimeSpan? expiration = null)
+    {
+        var db = GetDb();
+        await db.ListLeftPushAsync(key, value);
+        await db.KeyExpireAsync(key, expiration ?? TimeSpan.FromMinutes(30));
+
+    }
+    /// <summary>
+    /// Yeni eleman sona eklenir 
+    /// </summary>
+    public async Task ListRightPushAsync(string key, string value, TimeSpan? expiration = null)
+    {
+        var db = GetDb();
+        await db.ListRightPushAsync(key, value);
+        await db.KeyExpireAsync(key, expiration ?? TimeSpan.FromMinutes(30));
+    }
+    /// <summary>
+    /// Listeden belirli bir aralýktaki veriyi çeker
+    /// </summary>
+    public async Task<RedisValue[]> ListRangeAsync(string key, int start = 0, int stop = -1)
+    {
+        var db = GetDb();
+        return await db.ListRangeAsync(key, start, stop);
+    }
+    /// <summary>
+    /// Baþtan eleman çeker ve çektiði elemaný siler
+    /// </summary>
+    public async Task<string?> ListLeftPopAsync(string key)
+    {
+        var db = GetDb();
+        var result = await db.ListLeftPopAsync(key);
+        return result.HasValue ? result.ToString() : null;
+    }
+    /// <summary>
+    /// Sondan eleman çeker ve çektiði elemaný siler
+    /// </summary>
+    public async Task<string?> ListRightPopAsync(string key)
+    {
+        var db = GetDb();
+        var result = await db.ListRightPopAsync(key);
+        return result.HasValue ? result.ToString() : null;
+    }
+
+    /// <summary>
+    /// Belirtilen key için Redis listesinin uzunluðunu döner.
+    /// </summary>
+    public async Task<long> ListLengthAsync(string key)
+    {
+        var db = GetDb();
+        return await db.ListLengthAsync(key);
     }
 }

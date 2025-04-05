@@ -1,18 +1,16 @@
 using EveryDaily.Application.Consumers;
-using EveryDaily.Application.Repositories;
 using EveryDaily.Application.Services.Email;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
 using EveryDaily.Core.Settings;
 using EveryDaily.Domain.Prefix.RabbitMQ;
 using EveryDaily.Persistence;
-using EveryDaily.Persistence.BaseRepositories;
+using EveryDaily.Persistence.MongoContext;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 
 namespace EveryDaily.Application.Extensions;
 
@@ -68,7 +66,7 @@ public static class ConfigureExtensions
       {
          options.AddPolicy(corsName, builder =>
          {
-            builder.WithOrigins("http://localhost:3000", "https://dailyngo.com", "http://dailyngo.com")
+            builder.WithOrigins("http://localhost:3000", "https://dailyngo.com/","https://dailyngo.com/")
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();
@@ -91,13 +89,12 @@ public static class ConfigureExtensions
    public static void ConfigureMongoDbRepositories(this IServiceCollection services, IConfiguration configuration)
    {
       services.Configure<MongoDbSettings>(configuration.GetSection("MongoDBConnection"));
-      // asagidaki ornekteki gibi repositoryler eklenebilir.
-      services.AddScoped<MongoDbRepository<TestModel,ObjectId>,TestRepository>();
-   }
+      services.AddScoped<MongoDocContext>(opt => new MongoDocContext(opt.GetRequiredService<IOptions<MongoDbSettings>>()));
+    }
    
    public static void ConfigureServices(this IServiceCollection services)
    {
       services.AddTransient<IUserService, UserService>();
       services.AddTransient<IEmailService, EmailService>();
-   }
+    }
 }

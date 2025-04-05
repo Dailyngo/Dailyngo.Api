@@ -1,5 +1,6 @@
 using EveryDaily.Core.Entity;
 using EveryDaily.Domain.Entities;
+using EveryDaily.Domain.Entities.Follow;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<UniversityEntity> Universities { get; set; }
     public DbSet<AboutEntity> Abouts { get; set; }
     public DbSet<DepartmentEntity> Departments { get; set; }
+    public DbSet<FollowEntity> Follows { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

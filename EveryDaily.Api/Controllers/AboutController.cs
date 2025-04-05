@@ -1,27 +1,20 @@
 ﻿using EveryDaily.Application.Dtos.About.Request;
-using EveryDaily.Application.Dtos.About.Response;
-using EveryDaily.Application.Repositories;
 using EveryDaily.Application.Services.ControllerCommands.About.Commands;
 using EveryDaily.Application.Services.ControllerCommands.About.Queries;
 using EveryDaily.Core.ControllerBases;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace EveryDaily.Api.Controllers
 {
-
-
-
     [ApiController]
     [Route("api/[controller]s")]
     [Authorize]
-    public class AboutController(IMediator mediator) 
+    public class AboutController(IMediator mediator)
         : CustomControllerBase
     {
         [HttpPost]
-       
         public async Task<IActionResult> Create([FromBody] CreateAboutRequest createAboutRequest)
         {
             var response = await mediator.Send(new CreateAboutCommand
@@ -59,9 +52,5 @@ namespace EveryDaily.Api.Controllers
             var response = await mediator.Send(new GetOtherUserAboutQuery(userId));
             return CreateActionResultInstance(response);
         }
-
-       
-
-
     }
 }

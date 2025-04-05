@@ -40,7 +40,7 @@ public class JwtMiddleware
         string? token = null;
 
 
-        if (context.Request.Path.HasValue && context.Request.Path.Value.Contains("chathub"))
+        if (context.Request.Path.HasValue && context.Request.Path.Value.Contains("notification-hub"))
         {
             token = context.Request.Query["access_token"];
         }
