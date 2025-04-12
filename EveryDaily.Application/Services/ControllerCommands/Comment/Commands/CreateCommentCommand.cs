@@ -49,7 +49,7 @@ public class CreateCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
 
         var comment = new CommentDoc()
         {
-            UserId = userId,
+            UserId = userId.ToString(),
             Content = request.Data.Content,
             ReplyCommentId = request.Data.ReplyCommentId != null ? ObjectId.Parse(request.Data.ReplyCommentId) : null,
             CreatedAt = DateTime.UtcNow

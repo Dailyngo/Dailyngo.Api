@@ -6,7 +6,7 @@ namespace EveryDaily.Domain.Documents.Post;
 
 public class PostDoc : IEntityBase<ObjectId>
 {
-    public Guid UserId { get; set; }
+    public string UserId { get; set; }
     public string Content { get; set; }
     public string? ImageUrl { get; set; }
     public long ViewCount { get; set; }

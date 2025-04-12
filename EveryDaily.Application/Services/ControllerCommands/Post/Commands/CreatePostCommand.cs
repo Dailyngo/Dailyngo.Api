@@ -24,7 +24,7 @@ public class CreatePostCommandHandler(
 {
     public async Task<Response<NoContent>> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
-        var userId = userService.GetUserId();
+        var userId = userService.GetUserId().ToString();
 
         if (request.Data.Id != null)
         {
@@ -58,7 +58,7 @@ public class CreatePostCommandHandler(
         var post = new PostDoc
         {
             Content = request.Data.Content,
-            UserId = userId,
+            UserId = userId.ToString(),
             CreatedAt = DateTimeOffset.UtcNow,
             ViewCount = 0,
             LikeCount = 0

@@ -27,7 +27,7 @@ public class DeletePostCommandHandler(MongoDocContext mongoDocContext, IUserServ
         
         var filter = Builders<PostDoc>.Filter.And(
             Builders<PostDoc>.Filter.Eq(p => p.Id, request.Id),
-            Builders<PostDoc>.Filter.Eq(p => p.UserId, userId)
+            Builders<PostDoc>.Filter.Eq(p => p.UserId, userId.ToString())
         );
 
         var result =

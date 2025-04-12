@@ -32,7 +32,7 @@ public class CreateLikeCommandHandler(MongoDocContext mongoDocContext, IUserServ
             return Response<NoContent>.Fail(PostErrorMessage.PostNotFound, 404);
         
         var like = await mongoDocContext.Likes.Collection
-            .Find(p => p.UserId == userId && p.PostId == request.PostId)
+            .Find(p => p.UserId == userId.ToString() && p.PostId == request.PostId)
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
         if (like != null)
@@ -41,7 +41,7 @@ public class CreateLikeCommandHandler(MongoDocContext mongoDocContext, IUserServ
         var newLike = new LikeDoc
         {
             PostId = request.PostId,
-            UserId = userId,
+            UserId = userId.ToString(),
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };

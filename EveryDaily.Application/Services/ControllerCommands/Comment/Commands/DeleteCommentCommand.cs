@@ -22,7 +22,7 @@ public class DeleteCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
         var userId = userService.GetUserId();
 
         var comment = await mongoDocContext.Comments.Collection
-            .Find(p => p.Id == request.Id && p.UserId == userId)
+            .Find(p => p.Id == request.Id && p.UserId == userId.ToString())
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
         if (comment == null)
@@ -34,7 +34,7 @@ public class DeleteCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
 
         var filter = Builders<CommentDoc>.Filter.And(
             Builders<CommentDoc>.Filter.Eq(p => p.Id, request.Id),
-            Builders<CommentDoc>.Filter.Eq(p => p.UserId, userId)
+            Builders<CommentDoc>.Filter.Eq(p => p.UserId, userId.ToString())
         );
 
         await mongoDocContext.Comments.Collection.UpdateOneAsync(filter, update,

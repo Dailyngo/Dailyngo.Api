@@ -41,11 +41,11 @@ public class GetPostLikerListCommandHandler(
         if (post == null)
             return Response<List<GetPostLikerResponse>>.Fail(PostErrorMessage.PostNotFound, 404);
 
-        if (post.UserId != userId)
+        if (post.UserId != userId.ToString())
             return Response<List<GetPostLikerResponse>>.Fail(PostErrorMessage.NotPostOwner, 403);
 
         var likerIds = await mongoDocContext.Likes.Collection
-            .Find(l => l.PostId == request.PostId && l.UserId == userId)
+            .Find(l => l.PostId == request.PostId && l.UserId == userId.ToString())
             .Skip(skip)  
             .Limit(pageSize)
             .Project(l => l.UserId)
@@ -55,17 +55,17 @@ public class GetPostLikerListCommandHandler(
             return Response<List<GetPostLikerResponse>>.Success(204);
         
         var users = await appDbContext.Users
-            .Where(u => likerIds.Contains(u.Id))
+            .Where(u => likerIds.Contains(u.Id.ToString()))
             .Select(u => new { u.Id, u.FullName })
             .ToListAsync(cancellationToken);
 
         var currentUserFollowings = await appDbContext.Follows
-            .Where(f => f.FollowerId == userId && likerIds.Contains(f.FollowingId) && !f.IsDeleted)
+            .Where(f => f.FollowerId == userId && likerIds.Contains(f.FollowingId.ToString()) && !f.IsDeleted)
             .Select(f => f.FollowingId)
             .ToListAsync(cancellationToken);
 
         var currentUserFollowers = await appDbContext.Follows
-            .Where(f => f.FollowingId == userId && likerIds.Contains(f.FollowerId) && !f.IsDeleted)
+            .Where(f => f.FollowingId == userId && likerIds.Contains(f.FollowerId.ToString()) && !f.IsDeleted)
             .Select(f => f.FollowerId)
             .ToListAsync(cancellationToken);
 

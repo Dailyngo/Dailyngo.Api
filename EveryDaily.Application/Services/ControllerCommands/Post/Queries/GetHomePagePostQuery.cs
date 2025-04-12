@@ -34,7 +34,7 @@ public class GetHomePagePostQueryHandler(
 
         var followingUserIds = await appDbContext.Follows
             .Where(f => f.FollowerId == userId && !f.IsDeleted)
-            .Select(f => f.FollowingId)
+            .Select(f => f.FollowingId.ToString())
             .ToListAsync(cancellationToken);
 
         var filter = Builders<PostDoc>.Filter.And(
@@ -71,7 +71,7 @@ public class GetHomePagePostQueryHandler(
             .Take(pageSize)
             .ToList();
 
-        var userIds = scoredPosts.Select(x => x.Post.UserId).Distinct();
+        var userIds = scoredPosts.Select(x => Guid.Parse(x.Post.UserId)).Distinct();
         var userNames = await appDbContext.Users
             .Where(x => userIds.Contains(x.Id))
             .Select(x => new { x.Id, x.UserName })
@@ -79,12 +79,12 @@ public class GetHomePagePostQueryHandler(
 
         var response = scoredPosts.Select(x =>
         {
-            var userName = userNames.FirstOrDefault(u => u.Id == x.Post.UserId)?.UserName ?? "";
+            var userName = userNames.FirstOrDefault(u => u.Id.ToString() == x.Post.UserId)?.UserName ?? "";
 
             return new GetUserPostResponse
             {
                 Id = x.Post.Id.ToString(),
-                UserId = x.Post.UserId,
+                UserId = Guid.Parse(x.Post.UserId),
                 UserName = userName,
                 Content = x.Post.Content,
                 PostDate = x.Post.CreatedAt,

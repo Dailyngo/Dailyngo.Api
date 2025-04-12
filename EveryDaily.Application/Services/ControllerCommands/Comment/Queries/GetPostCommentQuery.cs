@@ -48,20 +48,20 @@ public class GetPostCommentQueryHandler(MongoDocContext mongoDocContext,IUserSer
         var userIds = comments.Select(c => c.UserId).Distinct().ToList();
 
         var userList = await appDbContext.Users
-            .Where(u => userIds.Contains(u.Id))
+            .Where(u => userIds.Contains(u.Id.ToString()))
             .Select(u => new { u.Id, u.UserName })
             .ToListAsync(cancellationToken);
 
         var response = comments.Select(comment =>
         {
-            var userName = userList.FirstOrDefault(u => u.Id == comment.UserId)?.UserName;
+            var userName = userList.FirstOrDefault(u => u.Id.ToString() == comment.UserId)?.UserName;
 
             return new GetPostCommentResponse
             {
                 Id = comment.Id.ToString(),
                 ReplyCommentId = comment.ReplyCommentId.ToString(),
-                UserId = comment.UserId,
-                CanDelete = comment.UserId == userId,
+                UserId = Guid.Parse( comment.UserId),
+                CanDelete = comment.UserId == userId.ToString(),
                 UserName = userName,
                 Content = comment.Content,
                 CommentDate = comment.CreatedAt

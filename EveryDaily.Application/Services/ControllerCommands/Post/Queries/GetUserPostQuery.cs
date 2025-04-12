@@ -67,7 +67,7 @@ public class GetUserPostQueryHandler(
         var skip = (pageNumber - 1) * pageSize;
 
         var filter = Builders<PostDoc>.Filter.And(
-            Builders<PostDoc>.Filter.Eq(x => x.UserId, request.UserId.Value),
+            Builders<PostDoc>.Filter.Eq(x => x.UserId, request.UserId.Value.ToString()),
             Builders<PostDoc>.Filter.Eq(x => x.IsDeleted, false));
 
         var postsCursor = await mongoDocContext.Posts.Collection
@@ -79,7 +79,7 @@ public class GetUserPostQueryHandler(
         var postList = await postsCursor.ToListAsync(cancellationToken: cancellationToken);
 
         var likeFilter = Builders<LikeDoc>.Filter.And(
-            Builders<LikeDoc>.Filter.Eq(x => x.UserId, request.UserId.Value),
+            Builders<LikeDoc>.Filter.Eq(x => x.UserId, request.UserId.Value.ToString()),
             Builders<LikeDoc>.Filter.Eq(x => x.IsDeleted, false),
             Builders<LikeDoc>.Filter.In(p => p.PostId, postList.Select(x => x.Id)));
 
@@ -103,7 +103,7 @@ public class GetUserPostQueryHandler(
             UserId = request.UserId ?? userService.GetUserId(),
             Content = x.Content,
             IsLiked = likeListGrouped
-                .FirstOrDefault(l => l.PostId == x.Id)?.LikeUserIds.Contains(userService.GetUserId()) ?? false,
+                .FirstOrDefault(l => l.PostId == x.Id)?.LikeUserIds.Contains(userService.GetUserId().ToString()) ?? false,
             PostDate = x.CreatedAt,
             LikeCount = x.LikeCount,
             CommentCount = x.CommentCount,

@@ -32,7 +32,7 @@ public class RemoveLikeCommandHandler(MongoDocContext mongoDocContext, IUserServ
             return Response<NoContent>.Fail(PostErrorMessage.PostNotFound, 404);
         
         var filter = Builders<LikeDoc>.Filter.And(
-            Builders<LikeDoc>.Filter.Eq(p => p.UserId, userId),
+            Builders<LikeDoc>.Filter.Eq(p => p.UserId, userId.ToString()),
             Builders<LikeDoc>.Filter.Eq(p => p.PostId, request.PostId)
         );
 
