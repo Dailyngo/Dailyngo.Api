@@ -16,6 +16,6 @@ public sealed class DocSet<TDocument> where TDocument : IEntityBase<ObjectId>
         var connectionString = configuration.ConnectionString;
         var client = new MongoClient(connectionString);
         var database = client.GetDatabase(configuration.DatabaseName);
-        Collection = database.GetCollection<TDocument>(typeof(TDocument).Name);
+        Collection = database.GetCollection<TDocument>($"{typeof(TDocument).Name}s");
     }
 }
