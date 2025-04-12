@@ -1,11 +1,16 @@
+using EveryDaily.Application.Consumers.ConsumerMessages;
+using EveryDaily.Application.Services.Badge;
 using EveryDaily.Application.Services.Jwt;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Entities;
 using EveryDaily.Domain.Enums;
+using EveryDaily.Domain.Enums.Rank;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
+using System.Threading;
 
 namespace EveryDaily.Application.Middleware;
 
@@ -20,7 +25,7 @@ public class JwtMiddleware
     }
 
     public async Task Invoke(HttpContext context, JwtTokenGenerator jwtTokenGenerator,
-        UserManager<UserEntity> _userManager, ILogger<JwtMiddleware> logger)
+        UserManager<UserEntity> _userManager, ILogger<JwtMiddleware> logger,IBusControl busControl)
     {
         if (context.Request.Path.Equals("/login", StringComparison.OrdinalIgnoreCase)
             || context.Request.Path.Equals("/register", StringComparison.OrdinalIgnoreCase))
@@ -60,6 +65,7 @@ public class JwtMiddleware
                 .FirstOrDefault(x => x.Type.Equals(JwtRegisteredClaimNames.NameId))?.Value;
             context.Items["email"] = validateTokenResult.UserClaims?
                 .FirstOrDefault(x => x.Type.Equals(JwtRegisteredClaimNames.Email))?.Value;
+          
         }
         else
         {

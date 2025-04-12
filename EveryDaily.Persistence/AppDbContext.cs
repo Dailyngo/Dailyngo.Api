@@ -1,6 +1,8 @@
 using EveryDaily.Core.Entity;
 using EveryDaily.Domain.Entities;
+using EveryDaily.Domain.Entities.DailyHistory;
 using EveryDaily.Domain.Entities.Follow;
+using EveryDaily.Domain.Entities.Rank;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +20,11 @@ public class AppDbContext : DbContext
     public DbSet<AboutEntity> Abouts { get; set; }
     public DbSet<DepartmentEntity> Departments { get; set; }
     public DbSet<FollowEntity> Follows { get; set; }
-    
+    public DbSet<UserDailyLoginHistoryEntity> UserDailyLoginHistories { get; set; }
+    public DbSet<UserDailyPostHistoryEntity> UserDailyPostHistories { get; set; }
+    public DbSet<UserXpStatusEntity> UserXpStatuses { get; set; }
+    public DbSet<UserXpHistoryEntity> UserXpHistories { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserEntity>().ToTable("Users");

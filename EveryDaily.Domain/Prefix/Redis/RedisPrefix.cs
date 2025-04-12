@@ -1,5 +1,6 @@
 using EveryDaily.Domain.Enums;
 using EveryDaily.Domain.Enums.Notification;
+using EveryDaily.Domain.Enums.Rank;
 
 namespace EveryDaily.Domain.Prefix.Redis;
 
@@ -15,6 +16,10 @@ public class RedisPrefix
     public static string GetUserNotificationsKey(Guid userId) => $"notifications:{userId}";
     public static string GetUnreadNotificationsKey(Guid userId) => $"unread_notifications:{userId}";
     public static string GetNotificationKey(Guid notificationId) => $"notification:{notificationId}";
+    #endregion
+
+    #region Rank
+    public static string GetUserRankActivityKey(Guid userId,XpActivityType xpActivityType) => $"userrankactivity:{userId}:{xpActivityType}";
     #endregion
 
 }
