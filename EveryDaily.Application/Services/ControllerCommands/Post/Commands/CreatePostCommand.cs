@@ -6,6 +6,7 @@ using EveryDaily.Domain.Prefix.ErrorMessage;
 using EveryDaily.Persistence;
 using EveryDaily.Persistence.MongoContext;
 using MediatR;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EveryDaily.Application.Services.ControllerCommands.Post.Commands;
@@ -25,11 +26,10 @@ public class CreatePostCommandHandler(
     {
         var userId = userService.GetUserId();
 
-        if (request.Data.Id.HasValue)
+        if (request.Data.Id != null)
         {
-            // check exist
             var postExist = await mongoDocContext.Posts.Collection
-                .Find(x => x.Id == request.Data.Id.Value && x.UserId == userId)
+                .Find(x => x.Id == ObjectId.Parse(request.Data.Id) && x.UserId == userId)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
             
             if (postExist == null)
@@ -39,7 +39,7 @@ public class CreatePostCommandHandler(
                 .Set(p => p.UpdatedAt, DateTimeOffset.UtcNow)
                 .Set(p => p.Content, request.Data.Content);
 
-            var filter = Builders<PostDoc>.Filter.Eq(p => p.Id, request.Data.Id.Value);
+            var filter = Builders<PostDoc>.Filter.Eq(p => p.Id,ObjectId.Parse(request.Data.Id));
             
             await mongoDocContext.Posts.Collection.UpdateOneAsync(filter, update,
                 cancellationToken: cancellationToken);

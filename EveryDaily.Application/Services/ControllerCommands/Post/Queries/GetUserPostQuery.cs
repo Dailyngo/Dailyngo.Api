@@ -98,7 +98,7 @@ public class GetUserPostQueryHandler(
 
         var response = postList.Select(x => new GetUserPostResponse
         {
-            Id = x.Id,
+            Id = x.Id.ToString(),
             UserName = userName,
             UserId = request.UserId ?? userService.GetUserId(),
             Content = x.Content,

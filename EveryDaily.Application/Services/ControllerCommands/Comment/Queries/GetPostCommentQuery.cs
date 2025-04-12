@@ -58,8 +58,8 @@ public class GetPostCommentQueryHandler(MongoDocContext mongoDocContext,IUserSer
 
             return new GetPostCommentResponse
             {
-                Id = comment.Id,
-                ReplyCommentId = comment.ReplyCommentId,
+                Id = comment.Id.ToString(),
+                ReplyCommentId = comment.ReplyCommentId.ToString(),
                 UserId = comment.UserId,
                 CanDelete = comment.UserId == userId,
                 UserName = userName,

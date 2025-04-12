@@ -4,7 +4,7 @@ namespace EveryDaily.Application.Dtos.Post.Responses;
 
 public class GetUserPostResponse
 {
-    public ObjectId Id { get; set; }
+    public string Id { get; set; }
     public string Content { get; set; }
     public DateTimeOffset? PostDate { get; set; }
     public long LikeCount { get; set; }

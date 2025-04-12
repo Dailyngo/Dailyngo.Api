@@ -5,6 +5,6 @@ namespace EveryDaily.Application.Dtos.Comment.Requests;
 public class CreateCommentRequest 
 {
     public string Content { get; set; }
-    public ObjectId PostId { get; set; }
-    public ObjectId? ReplyCommentId { get; set; }
+    public string PostId { get; set; }
+    public string? ReplyCommentId { get; set; }
 }

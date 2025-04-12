@@ -6,6 +6,7 @@ using EveryDaily.Domain.Prefix.ErrorMessage;
 using EveryDaily.Persistence.MongoContext;
 using MediatR;
 using Microsoft.Extensions.Primitives;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EveryDaily.Application.Services.ControllerCommands.Comment.Commands;
@@ -22,7 +23,7 @@ public class CreateCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
     {
         var userId = userService.GetUserId();
 
-        var postFilter = Builders<PostDoc>.Filter.And(Builders<PostDoc>.Filter.Eq(x => x.Id, request.Data.PostId),
+        var postFilter = Builders<PostDoc>.Filter.And(Builders<PostDoc>.Filter.Eq(x => x.Id, ObjectId.Parse(request.Data.PostId)),
             Builders<PostDoc>.Filter.Eq(x => x.IsDeleted, false));
 
         var post = await mongoDocContext.Posts.Collection
@@ -35,7 +36,7 @@ public class CreateCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
         if (request.Data.ReplyCommentId != null)
         {
             var replyCommentFilter = Builders<CommentDoc>.Filter.And(
-                Builders<CommentDoc>.Filter.Eq(x => x.Id, request.Data.ReplyCommentId),
+                Builders<CommentDoc>.Filter.Eq(x => x.Id, ObjectId.Parse(request.Data.ReplyCommentId)),
                 Builders<CommentDoc>.Filter.Eq(x => x.IsDeleted, false));
 
             var replyCommentExist = await mongoDocContext.Comments.Collection
@@ -50,7 +51,7 @@ public class CreateCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
         {
             UserId = userId,
             Content = request.Data.Content,
-            ReplyCommentId = request.Data.ReplyCommentId,
+            ReplyCommentId = request.Data.ReplyCommentId != null ? ObjectId.Parse(request.Data.ReplyCommentId) : null,
             CreatedAt = DateTime.UtcNow
         };
         

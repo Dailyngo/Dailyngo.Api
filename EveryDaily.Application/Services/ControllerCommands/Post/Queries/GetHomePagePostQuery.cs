@@ -83,7 +83,7 @@ public class GetHomePagePostQueryHandler(
 
             return new GetUserPostResponse
             {
-                Id = x.Post.Id,
+                Id = x.Post.Id.ToString(),
                 UserId = x.Post.UserId,
                 UserName = userName,
                 Content = x.Post.Content,

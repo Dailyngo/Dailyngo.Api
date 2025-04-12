@@ -9,6 +9,6 @@ public class CreatePostRequest
     [MinLength(10,ErrorMessage = "Gönderi uzunluğu 10 karakterden az olamaz.")]
     public string Content { get; set; }
 
-    public ObjectId? Id { get; set; }
+    public string? Id { get; set; }
    // public string? ImageUrl { get; set; }
 }
