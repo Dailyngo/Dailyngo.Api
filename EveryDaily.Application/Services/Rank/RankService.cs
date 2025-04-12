@@ -8,6 +8,7 @@ using EveryDaily.Domain.Prefix.Rank;
 using EveryDaily.Application.Services.Cache;
 using EveryDaily.Core.Settings;
 using EveryDaily.Domain.Prefix.Redis;
+using EveryDaily.Application.Dtos.Rank;
 
 namespace EveryDaily.Application.Services.Badge
 {
@@ -127,7 +128,68 @@ namespace EveryDaily.Application.Services.Badge
                 await dbContext.SaveChangesAsync();
             }
         }
+        public async Task<List<UserRankResponse>> GetUserRankAsync(Guid userId, bool old, CancellationToken cancellationToken)
+        {
+            List<UserRankResponse> userRankDtos = new List<UserRankResponse>();
 
+            if (old)
+            {
+                var xpStatuses = await dbContext.UserXpStatuses
+                    .Where(x => x.UserId == userId)
+                    .OrderByDescending(x => x.Season)
+                    .ToListAsync(cancellationToken);
+
+                var lastXpHistories = await dbContext.UserXpHistories
+                    .Where(x => x.UserId == userId)
+                    .GroupBy(x => x.Date.Year)
+                    .Select(g => g.OrderByDescending(x => x.Date).FirstOrDefault())
+                    .ToListAsync(cancellationToken);
+
+                foreach (var xpStatus in xpStatuses)
+                {
+                    var lastXpHistory = lastXpHistories
+                        .FirstOrDefault(x => x.Date.Year == xpStatus.Season);
+
+                    var lastXp = lastXpHistory?.XpGained ?? 0;
+                    var lastXpReason = lastXpHistory?.Source;
+
+                    userRankDtos.Add(new UserRankResponse
+                    {
+                        Rank = xpStatus.Rank,
+                        TotalXp = xpStatus.TotalXp,
+                        LastXp = lastXp,
+                        LastXpReason = lastXpReason ?? XpActivityType.None,
+                        Season = xpStatus.Season
+                    });
+                }
+            }
+            else
+            {
+                var currentSeason = Seasons.GetCurrentSeason();
+
+                var xpStatus = await dbContext.UserXpStatuses
+                    .FirstOrDefaultAsync(x => x.UserId == userId && x.Season == currentSeason, cancellationToken);
+
+                var lastXpHistory = await dbContext.UserXpHistories
+                    .Where(x => x.UserId == userId)
+                    .OrderByDescending(x => x.Date)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                var lastXp = lastXpHistory?.XpGained ?? 0;
+                var lastXpReason = lastXpHistory?.Source;
+
+                userRankDtos.Add(new UserRankResponse
+                {
+                    Rank = xpStatus?.Rank ?? RankEnum.bronze,
+                    TotalXp = xpStatus?.TotalXp ?? 0,
+                    LastXp = lastXp,
+                    LastXpReason = lastXpReason ?? XpActivityType.None,
+                    Season = currentSeason
+                });
+            }
+
+            return userRankDtos;
+        }
         private RankEnum GetRank(int totalXp)
         {
             return totalXp switch
@@ -137,7 +199,6 @@ namespace EveryDaily.Application.Services.Badge
                 _ => RankEnum.bronze
             };
         }
-
         private TimeSpan GetTimeUntilMidnight()
         {
             var now = DateTime.UtcNow;
