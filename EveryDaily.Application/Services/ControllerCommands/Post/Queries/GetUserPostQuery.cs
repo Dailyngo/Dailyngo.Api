@@ -60,6 +60,7 @@ public class GetUserPostQueryHandler(
                 return Response<List<GetUserPostResponse>>.Success(204);
 
             userName = userExist.UserName;
+            request.UserId = userId;
         }
 
         var pageSize = 10;

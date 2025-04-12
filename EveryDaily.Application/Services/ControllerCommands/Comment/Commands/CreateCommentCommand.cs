@@ -51,6 +51,7 @@ public class CreateCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
         {
             UserId = userId.ToString(),
             Content = request.Data.Content,
+            PostId = post.Id,
             ReplyCommentId = request.Data.ReplyCommentId != null ? ObjectId.Parse(request.Data.ReplyCommentId) : null,
             CreatedAt = DateTime.UtcNow
         };

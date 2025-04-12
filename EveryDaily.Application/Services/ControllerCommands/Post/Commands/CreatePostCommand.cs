@@ -47,10 +47,15 @@ public class CreatePostCommandHandler(
             return Response<NoContent>.Success(200);
         }
 
-        var now = DateTimeOffset.UtcNow;
+        var startOfToday = DateTime.UtcNow.Date;
+        var startOfTomorrow = startOfToday.AddDays(1);
+        
+        var filterPostCount = Builders<PostDoc>.Filter.Eq(p => p.UserId, userId) &
+                              Builders<PostDoc>.Filter.Where(p => p.CreatedAt >= startOfToday && p.CreatedAt < startOfTomorrow);
+        
         var queryBuilder = await mongoDocContext.Posts.Collection
-            .CountDocumentsAsync(x => x.UserId == userId && x.CreatedAt.Value.Date == now.Date,
-                cancellationToken: cancellationToken);
+            .Find(filterPostCount)
+            .CountDocumentsAsync(cancellationToken);
 
         if (queryBuilder >= 10)
             return Response<NoContent>.Fail(PostErrorMessage.PostLimitExceeded, 400);
@@ -58,7 +63,7 @@ public class CreatePostCommandHandler(
         var post = new PostDoc
         {
             Content = request.Data.Content,
-            UserId = userId.ToString(),
+            UserId = userId,
             CreatedAt = DateTimeOffset.UtcNow,
             ViewCount = 0,
             LikeCount = 0
