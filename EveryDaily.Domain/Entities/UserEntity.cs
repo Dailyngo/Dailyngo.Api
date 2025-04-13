@@ -1,4 +1,6 @@
 using EveryDaily.Core.Entity;
+using EveryDaily.Domain.Entities.DailyHistory;
+using EveryDaily.Domain.Entities.Rank;
 using Microsoft.AspNetCore.Identity;
 
 namespace EveryDaily.Domain.Entities;
@@ -12,4 +14,7 @@ public class UserEntity : IdentityUser<Guid>, IEntityBase
     public DateTimeOffset? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
     public AboutEntity About { get; set; }
+    public List<UserDailyLoginHistoryEntity> DailyLoginHistories { get; set; }
+    public List<UserXpStatusEntity>? XpStatus { get; set; }
+    public List<UserXpHistoryEntity>? UserXpHistories  { get; set; }
 }

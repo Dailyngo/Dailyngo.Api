@@ -59,6 +59,96 @@ namespace EveryDaily.Persistence.Migrations
                     b.ToTable("Abouts");
                 });
 
+            modelBuilder.Entity("EveryDaily.Domain.Entities.DailyHistory.UserDailyLoginHistoryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("LoginDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserDailyLoginHistories");
+                });
+
+            modelBuilder.Entity("EveryDaily.Domain.Entities.DailyHistory.UserDailyPostHistoryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("PostDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserDailyPostHistories");
+                });
+
+            modelBuilder.Entity("EveryDaily.Domain.Entities.DailyHistory.UserXpHistoryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("XpGained")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserXpHistories");
+                });
+
             modelBuilder.Entity("EveryDaily.Domain.Entities.DepartmentEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -145,6 +235,52 @@ namespace EveryDaily.Persistence.Migrations
                     b.HasIndex("FollowingId");
 
                     b.ToTable("Follows");
+                });
+
+            modelBuilder.Entity("EveryDaily.Domain.Entities.Rank.UserXpStatusEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastLoginDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LastPostDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LoginStrike")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PostStrike")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Season")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalXp")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserXpStatuses");
                 });
 
             modelBuilder.Entity("EveryDaily.Domain.Entities.RoleEntity", b =>
@@ -388,6 +524,39 @@ namespace EveryDaily.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EveryDaily.Domain.Entities.DailyHistory.UserDailyLoginHistoryEntity", b =>
+                {
+                    b.HasOne("EveryDaily.Domain.Entities.UserEntity", "User")
+                        .WithMany("DailyLoginHistories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EveryDaily.Domain.Entities.DailyHistory.UserDailyPostHistoryEntity", b =>
+                {
+                    b.HasOne("EveryDaily.Domain.Entities.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EveryDaily.Domain.Entities.DailyHistory.UserXpHistoryEntity", b =>
+                {
+                    b.HasOne("EveryDaily.Domain.Entities.UserEntity", "User")
+                        .WithMany("UserXpHistories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EveryDaily.Domain.Entities.DepartmentEntity", b =>
                 {
                     b.HasOne("EveryDaily.Domain.Entities.FacultyEntity", "Faculty")
@@ -429,6 +598,17 @@ namespace EveryDaily.Persistence.Migrations
                     b.Navigation("Following");
                 });
 
+            modelBuilder.Entity("EveryDaily.Domain.Entities.Rank.UserXpStatusEntity", b =>
+                {
+                    b.HasOne("EveryDaily.Domain.Entities.UserEntity", "User")
+                        .WithMany("XpStatus")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EveryDaily.Domain.Entities.DepartmentEntity", b =>
                 {
                     b.Navigation("Abouts");
@@ -448,6 +628,12 @@ namespace EveryDaily.Persistence.Migrations
                 {
                     b.Navigation("About")
                         .IsRequired();
+
+                    b.Navigation("DailyLoginHistories");
+
+                    b.Navigation("UserXpHistories");
+
+                    b.Navigation("XpStatus");
                 });
 #pragma warning restore 612, 618
         }

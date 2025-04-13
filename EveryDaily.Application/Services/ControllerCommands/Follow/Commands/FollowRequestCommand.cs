@@ -7,6 +7,7 @@ using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Domain.Prefix.Redis;
 using EveryDaily.Domain.Prefix.Socket;
+using EveryDaily.Persistence;
 using EveryDaily.Persistence.MongoContext;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
@@ -23,7 +24,9 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
         IRedisService redisService,
         IHubContext<NotificationHub> hubContext,
         MongoDocContext mongoDocContext,
-        IUserService userService)
+        IUserService userService,
+        AppDbContext context
+        )
         : IRequestHandler<FollowRequestCommand, Response<NoContent>>
     {
         public async Task<Response<NoContent>> Handle(FollowRequestCommand request, CancellationToken cancellationToken)
@@ -35,6 +38,13 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
                 return Response<NoContent>.Fail("Kendini takip etmek istiyorsan aynaya bak :)");
             }
 
+            var isAlreadyFollowing = await userService.IsFollowingAsync(request.ReceiverId, context);
+            if (isAlreadyFollowing)
+            {
+                return Response<NoContent>.Fail("Bu kullanıcıyı zaten takip ediyorsun.");
+            }
+
+
             var existingRequest = await mongoDocContext.FollowRequests.Collection.Find(
                 f => f.SenderId == userId.ToString()
                      && f.ReceiverId == request.ReceiverId.ToString()).AnyAsync(cancellationToken);
@@ -43,6 +53,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
             {
                 return Response<NoContent>.Fail("Zaten bir takip isteği göndermişsin. Sen ne olsun istiyorsun ?");
             }
+           
 
             var followRequest = new FollowRequestEntity
             {

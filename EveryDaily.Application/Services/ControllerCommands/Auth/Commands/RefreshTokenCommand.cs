@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
+using System;
 
 namespace EveryDaily.Application.Services.ControllerCommands.Auth.Commands;
 
@@ -20,7 +21,8 @@ public class RefreshTokenCommand : IRequest<Response<LoginResponse>>
 public class RefreshTokenHandler(
     UserManager<UserEntity> userManager,
     JwtTokenGenerator jwtTokenGenerator,
-    ILogger<RefreshTokenHandler> logger)
+    ILogger<RefreshTokenHandler> logger,
+    AppDbContext appDbContext)
     : IRequestHandler<RefreshTokenCommand, Response<LoginResponse>>
 {
     public async Task<Response<LoginResponse>> Handle(RefreshTokenCommand request,
