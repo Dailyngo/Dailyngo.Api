@@ -32,5 +32,16 @@ namespace EveryDaily.Api.Controllers
             var result = await mediator.Send(query);
             return CreateActionResultInstance(result);
         }
+
+
+        [HttpGet("HomePageRank")]
+        public async Task<IActionResult> GetHomePageRank([FromQuery] int pageNumber = 1)
+        {
+            var result = await mediator.Send(new GetHomePageRanksQuery
+            {
+                PageNumber = pageNumber
+            });
+            return CreateActionResultInstance(result);
+        }
     }
 }
