@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,6 @@ public class CustomAuthorizeFilter() : IAsyncAuthorizationFilter
     {
         if (!context.HttpContext.Request.Headers.TryGetValue("Authorization", out _))
         {
-            context.HttpContext.Response.StatusCode = 401;
             context.HttpContext.Response.StatusCode = 401;
             context.HttpContext.Response.ContentType = "application/json";
             await context.HttpContext.Response.WriteAsJsonAsync(new { message = "Unauthorized" });
