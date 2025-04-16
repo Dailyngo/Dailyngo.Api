@@ -27,23 +27,42 @@ builder.Configuration.AddJsonFile($"appsettings.{env ?? ""}.json");
 builder.Configuration.AddJsonFile($"JwtSettings.json");
 builder.Configuration.AddJsonFile("emailSettings.json");
 
-builder.Services.AddControllers(opt =>
-{
-    var policy = new AuthorizationPolicyBuilder("Bearer").RequireAuthenticatedUser().Build();
-    opt.Filters.Add(new AuthorizeFilter(policy));
-});
+builder.Services.AddControllers();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailOptions"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
+builder.Services.AddIdentity<UserEntity, RoleEntity>(options =>
+    {
+        options.Tokens.PasswordResetTokenProvider = "passwordReset";
+        options.SignIn.RequireConfirmedAccount = false;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredUniqueChars = 1;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireDigit = true;
+        options.User.RequireUniqueEmail = false;
+        options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
+        options.Tokens.EmailConfirmationTokenProvider = "TokenProvider";
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders()
+    .AddUserStore<UserStore<UserEntity, RoleEntity, AppDbContext, Guid>>()
+    .AddRoleStore<RoleStore<RoleEntity, AppDbContext, Guid>>();
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters.RoleClaimType = "role";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -103,24 +122,6 @@ builder.Services.AddSignalR();
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
-builder.Services.AddIdentity<UserEntity, RoleEntity>(options =>
-    {
-        options.Tokens.PasswordResetTokenProvider = "passwordReset";
-        options.SignIn.RequireConfirmedAccount = false;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequiredUniqueChars = 1;
-        options.Password.RequiredLength = 8;
-        options.Password.RequireNonAlphanumeric = true;
-        options.Password.RequireDigit = true;
-        options.User.RequireUniqueEmail = false;
-        options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
-        options.Tokens.EmailConfirmationTokenProvider = "TokenProvider";
-    })
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders()
-    .AddUserStore<UserStore<UserEntity, RoleEntity, AppDbContext, Guid>>()
-    .AddRoleStore<RoleStore<RoleEntity, AppDbContext, Guid>>();
 
 builder.Services.AddScoped<JwtTokenGenerator>();
 
@@ -157,8 +158,8 @@ app.UseRouting();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseResponseCaching();
-app.UseMiddleware<JwtMiddleware>();
 app.UseAuthentication();
+app.UseMiddleware<JwtMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 
