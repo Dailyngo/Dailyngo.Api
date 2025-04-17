@@ -72,7 +72,8 @@ public static class ConfigureExtensions
       {
          options.AddPolicy(corsName, builder =>
          {
-            builder.WithOrigins("http://localhost:3000", "https://dailyngo.com","https://dailyngo.com")
+            builder.WithOrigins(
+                  "http://localhost:3000","https://dailyngo.com")
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();

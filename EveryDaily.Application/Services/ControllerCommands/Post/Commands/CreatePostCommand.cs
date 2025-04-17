@@ -1,17 +1,20 @@
+using EveryDaily.Application.Consumers.ConsumerMessages;
 using EveryDaily.Application.Dtos.Post.Requests;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Documents.Post;
+using EveryDaily.Domain.Enums.Rank;
 using EveryDaily.Domain.Prefix.ErrorMessage;
 using EveryDaily.Persistence;
 using EveryDaily.Persistence.MongoContext;
+using MassTransit;
 using MediatR;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EveryDaily.Application.Services.ControllerCommands.Post.Commands;
 
-public class CreatePostCommand : IRequest<Response<NoContent>>
+public class CreatePostCommand : IRequest<Core.Dtos.Response<NoContent>>
 {
     public CreatePostRequest Data { get; init; }
 }
@@ -19,10 +22,11 @@ public class CreatePostCommand : IRequest<Response<NoContent>>
 public class CreatePostCommandHandler(
     AppDbContext appDbContext,
     MongoDocContext mongoDocContext,
+    IBusControl busControl,
     IUserService userService)
-    : IRequestHandler<CreatePostCommand, Response<NoContent>>
+    : IRequestHandler<CreatePostCommand, Core.Dtos.Response<NoContent>>
 {
-    public async Task<Response<NoContent>> Handle(CreatePostCommand request, CancellationToken cancellationToken)
+    public async Task<Core.Dtos.Response<NoContent>> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
         var userId = userService.GetUserId().ToString();
 
@@ -33,7 +37,7 @@ public class CreatePostCommandHandler(
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
             
             if (postExist == null)
-                return Response<NoContent>.Fail(PostErrorMessage.PostNotFound, 404);
+                return Core.Dtos.Response<NoContent>.Fail(PostErrorMessage.PostNotFound, 404);
          
             var update = Builders<PostDoc>.Update
                 .Set(p => p.UpdatedAt, DateTimeOffset.UtcNow)
@@ -44,7 +48,7 @@ public class CreatePostCommandHandler(
             await mongoDocContext.Posts.Collection.UpdateOneAsync(filter, update,
                 cancellationToken: cancellationToken);
             
-            return Response<NoContent>.Success(200);
+            return Core.Dtos.Response<NoContent>.Success(200);
         }
 
         var startOfToday = DateTime.UtcNow.Date;
@@ -58,7 +62,7 @@ public class CreatePostCommandHandler(
             .CountDocumentsAsync(cancellationToken);
 
         if (queryBuilder >= 10)
-            return Response<NoContent>.Fail(PostErrorMessage.PostLimitExceeded, 400);
+            return Core.Dtos.Response<NoContent>.Fail(PostErrorMessage.PostLimitExceeded, 400);
 
         var post = new PostDoc
         {
@@ -71,6 +75,12 @@ public class CreatePostCommandHandler(
 
         await mongoDocContext.Posts.Collection.InsertOneAsync(post, cancellationToken: cancellationToken);
 
-        return Response<NoContent>.Success(201);
+        await busControl.Publish(new RankActivityMessage()
+        {
+            UserId = userService.GetUserId(),
+            ActivityType = XpActivityType.post
+        },cancellationToken);
+
+        return Core.Dtos.Response<NoContent>.Success(201);
     }
 }
