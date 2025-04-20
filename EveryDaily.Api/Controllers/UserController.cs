@@ -29,5 +29,13 @@ namespace EveryDaily.Api.Controllers
 
             return CreateActionResultInstance(response);
         }
+
+        [HttpGet("birthdays")]
+        public async Task<IActionResult> GetTodaysBirthdays()
+        {
+           
+            var result = await mediator.Send(new GetBirthdayListQuery());
+            return CreateActionResultInstance(result);
+        }
     }
 }
