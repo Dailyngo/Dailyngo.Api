@@ -46,7 +46,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Auth.Commands
             var result = await userManager.ChangePasswordAsync(user, request.OldPassword, request.NewPassword);
 
             if (!result.Succeeded)
-                return Response<string>.Fail($"Şifre güncellenirken bir hata oluştu.\n {string.Join(", ", result.Errors.Select(x => x.Description))}");
+                return Response<string>.Fail($"{string.Join(", ", result.Errors.Select(x => x.Description))}");
 
             return Response<string>.Success("Şifre başarıyla güncellendi.", 200);
         }

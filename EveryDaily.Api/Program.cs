@@ -48,6 +48,7 @@ builder.Services.AddIdentity<UserEntity, RoleEntity>(options =>
         options.Tokens.EmailConfirmationTokenProvider = "TokenProvider";
     })
     .AddEntityFrameworkStores<AppDbContext>()
+    .AddErrorDescriber<TurkishIdentityErrorDescriber>()
     .AddDefaultTokenProviders()
     .AddUserStore<UserStore<UserEntity, RoleEntity, AppDbContext, Guid>>()
     .AddRoleStore<RoleStore<RoleEntity, AppDbContext, Guid>>();
