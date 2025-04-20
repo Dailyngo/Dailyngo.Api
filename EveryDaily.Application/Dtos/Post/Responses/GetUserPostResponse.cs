@@ -10,6 +10,7 @@ public class GetUserPostResponse
     public long LikeCount { get; set; }
     public long CommentCount { get; set; }
     public bool IsLiked { get; set; }
+    public bool IsOwner { get; set; }
     public Guid UserId { get; set; }
     public string? UserName { get; set; }
     public string? UserProfileImage { get; set; }
