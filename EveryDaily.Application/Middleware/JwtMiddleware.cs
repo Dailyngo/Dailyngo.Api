@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using EveryDaily.Application.Consumers.ConsumerMessages;
 using EveryDaily.Application.Services.Badge;
 using EveryDaily.Application.Services.Jwt;
@@ -25,25 +26,16 @@ public class JwtMiddleware
     }
 
     public async Task Invoke(HttpContext context, JwtTokenGenerator jwtTokenGenerator,
-        UserManager<UserEntity> _userManager, ILogger<JwtMiddleware> logger,IBusControl busControl)
+        UserManager<UserEntity> _userManager, ILogger<JwtMiddleware> logger, IBusControl busControl)
     {
-        if (context.Request.Path.Equals("/login", StringComparison.OrdinalIgnoreCase)
-            || context.Request.Path.Equals("/register", StringComparison.OrdinalIgnoreCase))
-        {
-            await _next(context);
-            return;
-        }
-
-
         if (context.Request.Path.ToString().ToLower().Equals($"{_basePath}/login")
-            || context.Request.Path.Equals("/register", StringComparison.OrdinalIgnoreCase))
+            || context.Request.Path.Equals($"{_basePath}/register", StringComparison.OrdinalIgnoreCase))
         {
             await _next(context);
             return;
         }
 
         string? token = null;
-
 
         if (context.Request.Path.HasValue && context.Request.Path.Value.Contains("notification-hub"))
         {
@@ -65,16 +57,16 @@ public class JwtMiddleware
                 .FirstOrDefault(x => x.Type.Equals(JwtRegisteredClaimNames.NameId))?.Value;
             context.Items["email"] = validateTokenResult.UserClaims?
                 .FirstOrDefault(x => x.Type.Equals(JwtRegisteredClaimNames.Email))?.Value;
-          
         }
         else
         {
             logger.LogError(validateTokenResult.Message, new Exception(validateTokenResult.Message));
             context.Response.StatusCode = 401;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsJsonAsync(new { message = validateTokenResult.Message});
+            await context.Response.WriteAsJsonAsync(new { message = validateTokenResult.Message });
             return;
         }
+
         await _next(context);
     }
 }

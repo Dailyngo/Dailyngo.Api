@@ -1,9 +1,11 @@
 using EveryDaily.Application.Consumers.ConsumerMessages;
 using EveryDaily.Application.Dtos.Comment.Requests;
+using EveryDaily.Application.Services.Notification;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Documents.Post;
 using EveryDaily.Domain.Enums.Rank;
+using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Domain.Prefix.ErrorMessage;
 using EveryDaily.Persistence.MongoContext;
 using MassTransit;
@@ -22,8 +24,7 @@ public class CreateCommentCommand : IRequest<Core.Dtos.Response<NoContent>>
 public class CreateCommentCommandHandler(
     MongoDocContext mongoDocContext,
     IUserService userService,
-    IBusControl busControl
-    )
+    IBusControl busControl,INotificationService notificationService)
     : IRequestHandler<CreateCommentCommand, Core.Dtos.Response<NoContent>>
 {
     public async Task<Core.Dtos.Response<NoContent>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -73,7 +74,8 @@ public class CreateCommentCommandHandler(
             UserId = Guid.Parse(post.UserId),
             ActivityType = XpActivityType.comment,
         }, cancellationToken);
-
+        
+        await notificationService.SendNotification(post.UserId,userId.ToString(),comment.Id.ToString(),NotificationType.Comment,cancellationToken);
 
         return Core.Dtos.Response<NoContent>.Success(204);
     }

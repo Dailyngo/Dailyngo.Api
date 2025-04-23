@@ -1,4 +1,5 @@
 ﻿using EveryDaily.Application.Services.ControllerCommands.Follow.Commands;
+using EveryDaily.Application.Services.ControllerCommands.Follow.Queries;
 using EveryDaily.Application.Services.ControllerQueries.Follow.Queries;
 using EveryDaily.Core.ControllerBases;
 using MediatR;
@@ -58,6 +59,13 @@ namespace EveryDaily.Api.Controllers
         /// </summary>
         [HttpPost("unfollow")]
         public async Task<IActionResult> UnFollow([FromBody] UnfollowUserCommand query)
+        {
+            var result = await mediator.Send(query);
+            return CreateActionResultInstance(result);
+        }
+
+        [HttpGet("home-friends")]
+        public async Task<IActionResult> HomePageFriendList([FromQuery] HomePageFriendListQuery query)
         {
             var result = await mediator.Send(query);
             return CreateActionResultInstance(result);

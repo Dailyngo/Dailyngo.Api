@@ -163,7 +163,7 @@ namespace EveryDaily.Application.Services.Badge
         public async Task<List<UserRankResponse>> GetUserRankAsync(Guid userId, bool old, CancellationToken cancellationToken)
         {
             List<UserRankResponse> userRankDtos = new List<UserRankResponse>();
-
+            //
             if (old)
             {
                 var xpStatuses = await dbContext.UserXpStatuses

@@ -55,4 +55,11 @@ public class PostController(IMediator mediator)
         });
         return CreateActionResultInstance(response);
     }
+
+    [HttpGet("byId")]
+    public async Task<IActionResult> Get([FromQuery] GetPostByIdQuery query)
+    {
+        var response = await mediator.Send(query);
+        return CreateActionResultInstance(response);
+    }
 }

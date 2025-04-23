@@ -22,12 +22,20 @@ namespace EveryDaily.Api.Controllers
             return CreateActionResultInstance(response);
         }
 
-        [HttpGet("profile-card0")]
-        public async Task<IActionResult> Get()
+        [HttpGet("profile-card")]
+        public async Task<IActionResult> Get([FromQuery] GetProfileCardQuery query)
         {
-            var response = await mediator.Send(new GetProfileCardQuery());
+            var response = await mediator.Send(query);
 
             return CreateActionResultInstance(response);
+        }
+
+        [HttpGet("birthdays")]
+        public async Task<IActionResult> GetTodaysBirthdays()
+        {
+           
+            var result = await mediator.Send(new GetBirthdayListQuery());
+            return CreateActionResultInstance(result);
         }
     }
 }

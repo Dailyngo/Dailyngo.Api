@@ -76,6 +76,22 @@ public class GetHomePagePostQueryHandler(
             .Where(x => userIds.Contains(x.Id))
             .Select(x => new { x.Id, x.UserName })
             .ToListAsync(cancellationToken);
+        
+        var likeFilter = Builders<LikeDoc>.Filter.And(Builders<LikeDoc>.Filter.Eq(x => x.IsDeleted, false),
+            Builders<LikeDoc>.Filter.In(p => p.PostId, scoredPosts.Select(x => x.Post.Id)));
+
+        var likeCursor = await mongoDocContext.Likes.Collection
+            .Find(likeFilter)
+            .ToCursorAsync(cancellationToken: cancellationToken);
+
+        var likeList = await likeCursor.ToListAsync(cancellationToken: cancellationToken);
+
+        var likeListGrouped = likeList.GroupBy(x => x.PostId)
+            .Select(g => new
+            {
+                PostId = g.Key,
+                LikeUserIds = g.Select(x => x.UserId).ToList()
+            }).ToList();
 
         var response = scoredPosts.Select(x =>
         {
@@ -87,9 +103,12 @@ public class GetHomePagePostQueryHandler(
                 UserId = Guid.Parse(x.Post.UserId),
                 UserName = userName,
                 Content = x.Post.Content,
+                IsLiked = likeListGrouped
+                    .FirstOrDefault(l => l.PostId == x.Post.Id)?.LikeUserIds.Contains(userService.GetUserId().ToString()) ?? false,
                 PostDate = x.Post.CreatedAt,
                 LikeCount = x.Post.LikeCount,
                 CommentCount = x.Post.CommentCount,
+                IsOwner = x.Post.UserId == userId.ToString()
             };
         }).ToList();
 

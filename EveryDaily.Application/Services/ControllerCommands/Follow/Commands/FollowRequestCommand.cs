@@ -1,4 +1,5 @@
-﻿using EveryDaily.Application.Services.UserService;
+﻿using EveryDaily.Application.Services.Notification;
+using EveryDaily.Application.Services.UserService;
 using EveryDaily.Application.Socket;
 using EveryDaily.Core;
 using EveryDaily.Core.Dtos;
@@ -21,11 +22,10 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
     }
 
     public class FollowRequestCommandHandler(
-        IRedisService redisService,
-        IHubContext<NotificationHub> hubContext,
         MongoDocContext mongoDocContext,
         IUserService userService,
-        AppDbContext context
+        AppDbContext context,
+        INotificationService notificationService
         )
         : IRequestHandler<FollowRequestCommand, Response<NoContent>>
     {
@@ -63,29 +63,13 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
 
             await mongoDocContext.FollowRequests.Collection.InsertOneAsync(followRequest, new(), cancellationToken);
 
-            var notification = new NotificationEntity
-            {
-                ReceiverId = request.ReceiverId.ToString(),
-                SenderId = userId.ToString(),
-                Type = NotificationType.Follow,
-                RelatedEntityId = followRequest.Id.ToString(),
-                IsDeleted = false
-            };
-
-            await mongoDocContext.Notifications.Collection.InsertOneAsync(notification, new(), cancellationToken);
-
-            await redisService.ListLeftPushAsync(
-                RedisPrefix.GetUserNotificationsKey(request.ReceiverId),
-                $"{NotificationType.Follow}", TimeSpan.FromDays(1)
-            );
-
-            await hubContext.Clients.Group(request.ReceiverId.ToString()).SendAsync(
-                NotificationHubMethods.ReceiveNotification,
-                await mongoDocContext.Notifications.Collection.CountDocumentsAsync(
-                    n => n.ReceiverId == request.ReceiverId.ToString() && !n.IsRead, new(), cancellationToken),
+            await notificationService.SendNotification(
+                request.ReceiverId.ToString(),
+                userId.ToString(),
+                followRequest.Id.ToString(),
+                NotificationType.Follow,
                 cancellationToken
             );
-
 
             return Response<NoContent>.Success(201);
         }

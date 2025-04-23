@@ -9,6 +9,7 @@ namespace EveryDaily.Domain.Entities
         public Guid DepartmentId { get; set; }
         public DateTimeOffset? BirthDate { get; set; }
         public Gender Gender { get; set; }
+        public string? Bio { get; set; }
         public UserEntity User { get; set; }
         public DepartmentEntity Department { get; set; }
     }

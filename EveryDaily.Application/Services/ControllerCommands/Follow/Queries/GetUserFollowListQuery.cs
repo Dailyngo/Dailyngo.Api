@@ -10,6 +10,8 @@ namespace EveryDaily.Application.Services.ControllerQueries.Follow.Queries
     {
         public Guid UserId { get; set; }
         public bool IsFollowingList { get; set; } // true: takip ettikleri, false: takipçileri
+        public int PageNumber { get; set; } = 1;
+
     }
 
     public class GetUserFollowListQueryHandler(AppDbContext context)
@@ -17,6 +19,10 @@ namespace EveryDaily.Application.Services.ControllerQueries.Follow.Queries
     {
         public async Task<Response<List<UserFollowResponse>>> Handle(GetUserFollowListQuery request, CancellationToken cancellationToken)
         {
+
+            int pageSize = 20;
+            int skip = (request.PageNumber - 1) * pageSize;
+
             List<UserFollowResponse> followList;
 
             if (request.IsFollowingList)
@@ -24,11 +30,14 @@ namespace EveryDaily.Application.Services.ControllerQueries.Follow.Queries
                 // Kullanıcının takip ettiklerini getir (Following)
                 followList = await context.Follows
                     .Where(f => f.FollowerId == request.UserId)
-                    .Select(f=> new UserFollowResponse
+                    .OrderByDescending(f => f.CreatedAt)
+                    .Select(f => new UserFollowResponse
                     {
                         FullName = f.Following.FullName,
                         UserId = f.FollowingId
-                    })
+                    })          
+                    .Skip(skip)
+                    .Take(pageSize)
                     .ToListAsync(cancellationToken);
             }
             else
@@ -36,11 +45,14 @@ namespace EveryDaily.Application.Services.ControllerQueries.Follow.Queries
                 // Kullanıcıyı takip edenleri getir (Followers)
                 followList = await context.Follows
                     .Where(f => f.FollowingId == request.UserId)
-                    .Select(f=> new UserFollowResponse
+                    .OrderByDescending(f => f.CreatedAt)
+                    .Select(f => new UserFollowResponse
                     {
                         FullName = f.Follower.FullName,
                         UserId = f.FollowerId
                     })
+                    .Skip(skip)
+                    .Take(pageSize)
                     .ToListAsync(cancellationToken);
             }
 
