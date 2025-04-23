@@ -23,9 +23,9 @@ namespace EveryDaily.Api.Controllers
         }
 
         [HttpGet("profile-card")]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] GetProfileCardQuery query)
         {
-            var response = await mediator.Send(new GetProfileCardQuery());
+            var response = await mediator.Send(query);
 
             return CreateActionResultInstance(response);
         }

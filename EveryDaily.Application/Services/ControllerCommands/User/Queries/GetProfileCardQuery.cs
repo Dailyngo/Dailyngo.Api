@@ -15,6 +15,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.User.Queries
 {
     public class GetProfileCardQuery : IRequest<Response<GetProfileCardResponse>>
     {
+        public Guid? UserId { get; set; }
     }
 
     public class GetProfileCardQueryHandler(
@@ -26,7 +27,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.User.Queries
         public async Task<Response<GetProfileCardResponse>> Handle(GetProfileCardQuery request,
             CancellationToken cancellationToken)
         {
-            var userID = userService.GetUserId();
+            var userID = request.UserId ?? userService.GetUserId();
 
             var user = await appDbContext.Users
                 .Select(x => new { x.Id, x.FullName, x.UserName, x.About.Bio })
