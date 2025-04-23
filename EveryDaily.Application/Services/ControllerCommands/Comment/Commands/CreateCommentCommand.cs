@@ -1,11 +1,14 @@
+using EveryDaily.Application.Consumers.ConsumerMessages;
 using EveryDaily.Application.Dtos.Comment.Requests;
 using EveryDaily.Application.Services.Notification;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Documents.Post;
+using EveryDaily.Domain.Enums.Rank;
 using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Domain.Prefix.ErrorMessage;
 using EveryDaily.Persistence.MongoContext;
+using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Primitives;
 using MongoDB.Bson;
@@ -13,15 +16,18 @@ using MongoDB.Driver;
 
 namespace EveryDaily.Application.Services.ControllerCommands.Comment.Commands;
 
-public class CreateCommentCommand : IRequest<Response<NoContent>>
+public class CreateCommentCommand : IRequest<Core.Dtos.Response<NoContent>>
 {
     public CreateCommentRequest Data { get; set; }
 }
 
-public class CreateCommentCommandHandler(MongoDocContext mongoDocContext, IUserService userService,INotificationService notificationService)
-    : IRequestHandler<CreateCommentCommand, Response<NoContent>>
+public class CreateCommentCommandHandler(
+    MongoDocContext mongoDocContext,
+    IUserService userService,
+    IBusControl busControl,INotificationService notificationService)
+    : IRequestHandler<CreateCommentCommand, Core.Dtos.Response<NoContent>>
 {
-    public async Task<Response<NoContent>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
+    public async Task<Core.Dtos.Response<NoContent>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
     {
         var userId = userService.GetUserId();
 
@@ -33,7 +39,7 @@ public class CreateCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
             .FirstOrDefaultAsync(cancellationToken);
 
         if (post == null)
-            return Response<NoContent>.Fail(PostErrorMessage.PostNotFound, 404);
+            return Core.Dtos.Response<NoContent>.Fail(PostErrorMessage.PostNotFound, 404);
 
         if (request.Data.ReplyCommentId != null)
         {
@@ -46,7 +52,7 @@ public class CreateCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
                 .AnyAsync(cancellationToken);
             
             if (!replyCommentExist)
-                return Response<NoContent>.Fail(CommentErrorMessage.ReplyCommentNotFound, 404);
+                return Core.Dtos.Response<NoContent>.Fail(CommentErrorMessage.ReplyCommentNotFound, 404);
         }
 
         var comment = new CommentDoc()
@@ -63,8 +69,14 @@ public class CreateCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
         var updatePost = Builders<PostDoc>.Update.Inc(x => x.CommentCount, 1);
         await mongoDocContext.Posts.Collection.UpdateOneAsync(postFilter, updatePost, cancellationToken: cancellationToken);
 
-        await notificationService.SendNotification(post.UserId.ToString(),userId.ToString(),comment.Id.ToString(),NotificationType.Comment,cancellationToken);
+        await busControl.Publish(new RankActivityMessage
+        {
+            UserId = Guid.Parse(post.UserId),
+            ActivityType = XpActivityType.comment,
+        }, cancellationToken);
+        
+        await notificationService.SendNotification(post.UserId,userId.ToString(),comment.Id.ToString(),NotificationType.Comment,cancellationToken);
 
-        return Response<NoContent>.Success(204);
+        return Core.Dtos.Response<NoContent>.Success(204);
     }
 }

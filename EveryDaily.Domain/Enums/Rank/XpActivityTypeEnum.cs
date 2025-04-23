@@ -4,6 +4,8 @@
     {
         None = 0,
         login,      // Giriş
-        post    // Post
+        post,       // Post
+        like,      // Beğeni
+        comment    // Yorum
     }
 }
