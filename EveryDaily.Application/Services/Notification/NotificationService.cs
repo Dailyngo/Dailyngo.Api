@@ -24,7 +24,9 @@ namespace EveryDaily.Application.Services.Notification
                 SenderId = userId,
                 Type = type,
                 RelatedEntityId = relatedEntityId,
-                IsDeleted = false
+                IsDeleted = false,
+                CreatedAt
+                = DateTime.UtcNow,
             };
 
             await mongoDocContext.Notifications.Collection.InsertOneAsync(notification, new(), cancellationToken);
