@@ -35,12 +35,11 @@ namespace EveryDaily.Application.Services.ControllerCommands.User.Queries
                         BirthDate = a.BirthDate
                     })
                     .ToListAsync(cancellationToken);
+
             if (response.Count == 0)
             {
-                // Bugün doğum günü olan kimse yoksa bu mesajı döndür
-                return Response<List<GetBirthdayListResponse>>.Success(
-                    new List<GetBirthdayListResponse> { new GetBirthdayListResponse { FullName = "Bugün kimsenin doğum günü yok." } }
-                );
+                // Bugün doğum günü olan kimse yoksa 
+                return Response<List<GetBirthdayListResponse>>.Success(null);
             }
 
             return Response<List<GetBirthdayListResponse>>.Success(response);

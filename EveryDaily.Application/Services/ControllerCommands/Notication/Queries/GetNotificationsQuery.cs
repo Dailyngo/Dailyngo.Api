@@ -38,6 +38,8 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
                 .Where(u => notifications.Select(x => Guid.Parse(x.SenderId)).Contains(u.Id))
                 .Select(u => new { u.FullName, u.Id }).ToListAsync(cancellationToken);
 
+           
+
             var groupedNotifications = new NotificationResponse
             {
                 FollowRequests = notifications
@@ -49,7 +51,38 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
                             .First(),
                         RelatedEntityId = n.RelatedEntityId
                     })
-                    .ToList()
+                    .ToList(),
+
+                CommentNotifications = notifications
+                     .Where(n => n.Type == NotificationType.Comment)
+                     .Select(n => new CommentNotificationDto
+                     {
+                         SenderId = Guid.Parse(n.SenderId),
+                         SenderName = senderNames.First(sn => sn.Id == Guid.Parse(n.SenderId)).FullName,
+                         RelatedEntityId = n.RelatedEntityId,
+                        // CommentText = n.Message
+                     })
+                 .ToList(),
+
+                Likes = notifications
+                    .Where(n => n.Type == NotificationType.Like)
+                    .Select(n => new LikeNotificationDto
+                    {
+                         SenderId = Guid.Parse(n.SenderId),
+                         SenderName = senderNames.Where(sn => sn.Id == Guid.Parse(n.SenderId)).Select(sn => sn.FullName).FirstOrDefault(),
+                         RelatedEntityId = n.RelatedEntityId
+                    })
+                .ToList(),
+
+                Announcements = notifications
+                    .Where(n => n.Type == NotificationType.Announcement)
+                    .Select(n => new AnnouncementNotificationDto
+                    {
+                        // Message = n.Message,
+                         RelatedEntityId = n.RelatedEntityId
+                    })
+                .ToList()
+
             };
 
             if (notifications.Any())
