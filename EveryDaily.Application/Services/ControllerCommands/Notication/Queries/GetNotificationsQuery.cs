@@ -124,8 +124,8 @@ public class GetNotificationsQueryHandler(
         if (comment == null || string.IsNullOrWhiteSpace(comment.Content))
             return null;
 
-        return comment.Content.Length > 50
+        return comment?.Content?.Length > 50
             ? comment.Content.Substring(0, 50) + "..."
-            : comment.Content;
+            : comment?.Content ?? "";
     }
 }
