@@ -1,6 +1,8 @@
+using EveryDaily.Application.Services.Notification;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Documents.Post;
+using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Domain.Prefix.ErrorMessage;
 using EveryDaily.Persistence.MongoContext;
 using MediatR;
@@ -14,7 +16,7 @@ public class CreateLikeCommand : IRequest<Response<NoContent>>
     public ObjectId PostId { get; set; }
 }
 
-public class CreateLikeCommandHandler(MongoDocContext mongoDocContext, IUserService userService)
+public class CreateLikeCommandHandler(MongoDocContext mongoDocContext, IUserService userService,INotificationService notificationService)
     : IRequestHandler<CreateLikeCommand, Response<NoContent>>
 {
     public async Task<Response<NoContent>> Handle(CreateLikeCommand request, CancellationToken cancellationToken)
@@ -53,6 +55,9 @@ public class CreateLikeCommandHandler(MongoDocContext mongoDocContext, IUserServ
 
         await mongoDocContext.Posts.Collection.UpdateOneAsync(postFilter, updatePost,
             cancellationToken: cancellationToken);
+
+        await notificationService.SendNotification(post.UserId.ToString(),
+            userId.ToString(), request.PostId.ToString(), NotificationType.Like); 
 
         return Response<NoContent>.Success(204);
     }
