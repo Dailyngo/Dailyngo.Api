@@ -1,13 +1,16 @@
 ﻿using EveryDaily.Application.Dtos.Notification;
 using EveryDaily.Application.Services.UserService;
+using EveryDaily.Application.Socket;
 using EveryDaily.Core;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Domain.Prefix.Redis;
+using EveryDaily.Domain.Prefix.Socket;
 using EveryDaily.Persistence;
 using EveryDaily.Persistence.MongoContext;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 
@@ -21,6 +24,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
         IRedisService redisService,
         MongoDocContext mongoDocContext,
         IUserService userService,
+        IHubContext<NotificationHub> hubContext,
         AppDbContext appDbContext)
         : IRequestHandler<GetNotificationsQuery, Response<NotificationResponse>>
     {
@@ -56,11 +60,14 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
             {
                 var update = Builders<NotificationEntity>.Update.Set(n => n.IsRead, true);
                 await mongoDocContext.Notifications.Collection.UpdateManyAsync(
-                    n => n.ReceiverId == userId.ToString() && !n.IsRead, update);
+                    n => n.ReceiverId == userId.ToString() && !n.IsRead, update, cancellationToken: cancellationToken);
             }
 
             await redisService.DeleteAsync(redisKey);
 
+            await hubContext.Clients.Group(userId.ToString())
+                .SendAsync(NotificationHubMethods.ReceiveNotification, 0,cancellationToken);
+            
             return Response<NotificationResponse>.Success(groupedNotifications, 200);
         }
     }
