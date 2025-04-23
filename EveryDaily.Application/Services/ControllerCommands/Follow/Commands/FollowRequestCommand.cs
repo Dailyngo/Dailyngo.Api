@@ -67,7 +67,8 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
                 request.ReceiverId.ToString(),
                 userId.ToString(),
                 followRequest.Id.ToString(),
-                NotificationType.Follow
+                NotificationType.Follow,
+                cancellationToken
             );
 
             return Response<NoContent>.Success(201);

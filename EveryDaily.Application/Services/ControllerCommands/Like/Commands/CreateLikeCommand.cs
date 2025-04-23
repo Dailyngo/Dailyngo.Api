@@ -57,7 +57,7 @@ public class CreateLikeCommandHandler(MongoDocContext mongoDocContext, IUserServ
             cancellationToken: cancellationToken);
 
         await notificationService.SendNotification(post.UserId.ToString(),
-            userId.ToString(), request.PostId.ToString(), NotificationType.Like); 
+            userId.ToString(), request.PostId.ToString(), NotificationType.Like,cancellationToken); 
 
         return Response<NoContent>.Success(204);
     }

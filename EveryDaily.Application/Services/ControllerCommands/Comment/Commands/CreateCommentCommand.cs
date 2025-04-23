@@ -63,7 +63,7 @@ public class CreateCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
         var updatePost = Builders<PostDoc>.Update.Inc(x => x.CommentCount, 1);
         await mongoDocContext.Posts.Collection.UpdateOneAsync(postFilter, updatePost, cancellationToken: cancellationToken);
 
-        await notificationService.SendNotification(post.UserId.ToString(),userId.ToString(),comment.Id.ToString(),NotificationType.Comment);
+        await notificationService.SendNotification(post.UserId.ToString(),userId.ToString(),comment.Id.ToString(),NotificationType.Comment,cancellationToken);
 
         return Response<NoContent>.Success(204);
     }

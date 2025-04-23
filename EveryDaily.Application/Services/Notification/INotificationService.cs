@@ -4,6 +4,6 @@ namespace EveryDaily.Application.Services.Notification
 {
     public interface INotificationService
     {
-        public Task SendNotification(string receiverId, string userId, string relatedEntityId, NotificationType typr);
+        public Task SendNotification(string receiverId, string userId, string relatedEntityId, NotificationType type, CancellationToken cancellationToken);
     }
 }

@@ -12,12 +12,11 @@ using MongoDB.Driver;
 namespace EveryDaily.Application.Services.Notification
 {
     public class NotificationService(MongoDocContext mongoDocContext
-        ,CancellationToken cancellationToken
-        ,RedisService redisService
+        ,IRedisService redisService
         , IHubContext<NotificationHub> hubContext) : INotificationService
     {
 
-        public async Task SendNotification(string receiverId,string userId,string relatedEntityId, NotificationType type)
+        public async Task SendNotification(string receiverId,string userId,string relatedEntityId, NotificationType type,CancellationToken cancellationToken)
         {
             var notification = new NotificationEntity
             {
