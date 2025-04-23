@@ -70,7 +70,7 @@ public class GetNotificationsQueryHandler(
                 SenderId = Guid.Parse(n.SenderId),
                 SenderName = senderNames.FirstOrDefault(sn => sn.Id == Guid.Parse(n.SenderId))?.FullName,
                 RelatedEntityId = n.RelatedEntityId,
-                CreatedAt = n.CreatedAt.Value
+                CreatedAt = n.CreatedAt
             })
             .OrderByDescending(n => n.CreatedAt)
             .ToList();
@@ -93,7 +93,7 @@ public class GetNotificationsQueryHandler(
                         ? FormatComment(comments.FirstOrDefault(c => c.Id == ObjectId.Parse(n.RelatedEntityId)))
                         : null,
                     NotificationType = n.Type,
-                    CreatedAt = n.CreatedAt.Value
+                    CreatedAt = n.CreatedAt
                 };
             })
             .Where(n => n.SenderId != Guid.Empty)
@@ -124,8 +124,8 @@ public class GetNotificationsQueryHandler(
         if (comment == null || string.IsNullOrWhiteSpace(comment.Content))
             return null;
 
-        return comment.Content.Length > 50
+        return comment?.Content?.Length > 50
             ? comment.Content.Substring(0, 50) + "..."
-            : comment.Content;
+            : comment?.Content ?? "";
     }
 }

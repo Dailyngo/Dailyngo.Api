@@ -15,6 +15,6 @@ namespace EveryDaily.Application.Dtos.Notification
         public string? RelatedEntityId { get; set; }
         public string? Text { get; set; } // CommentText, AnnouncementMessage gibi
         public NotificationType NotificationType { get; set; }
-        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset? CreatedAt { get; set; }
     }
 }

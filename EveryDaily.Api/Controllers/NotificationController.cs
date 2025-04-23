@@ -1,7 +1,6 @@
 ﻿using EveryDaily.Core.ControllerBases;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EveryDaily.Api.Controllers
