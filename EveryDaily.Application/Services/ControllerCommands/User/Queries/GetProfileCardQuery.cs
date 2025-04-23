@@ -23,6 +23,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.User.Queries
             var userID = userService.GetUserId();
 
             var user = await appDbContext.Users
+                .Select(x=> new {x.Id,x.FullName,x.UserName,x.About.Bio})
                 .FirstOrDefaultAsync(x => x.Id == userID, cancellationToken);
 
             if (user == null)
@@ -33,15 +34,20 @@ namespace EveryDaily.Application.Services.ControllerCommands.User.Queries
             var followersCount = await appDbContext.Follows.CountAsync(f => f.FollowingId == userID, cancellationToken);
             var followingCount = await appDbContext.Follows.CountAsync(f => f.FollowerId == userID, cancellationToken);
 
+            var bio = await appDbContext.Abouts
+                .FirstOrDefaultAsync(x => x.UserId == userID, cancellationToken);
             var response = new GetProfileCardResponse
             {
+                Bio = user.Bio,
                 Follower = followersCount,
-                FollowUp = followingCount,
+                Following = followingCount,
                 GetUserResponse = new GetUserResponse
                 {
+                    ProfilePicture = null,
                     FullName = user.FullName,
                     UserName = user.UserName,
                 }
+
             };
 
 

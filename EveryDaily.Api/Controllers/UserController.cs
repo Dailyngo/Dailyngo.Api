@@ -22,7 +22,7 @@ namespace EveryDaily.Api.Controllers
             return CreateActionResultInstance(response);
         }
 
-        [HttpGet("profile-card0")]
+        [HttpGet("profile-card")]
         public async Task<IActionResult> Get()
         {
             var response = await mediator.Send(new GetProfileCardQuery());
