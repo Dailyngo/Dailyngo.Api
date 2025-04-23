@@ -1,4 +1,5 @@
 using EveryDaily.Application.Dtos.Auth.Request;
+using EveryDaily.Application.Dtos.Auth.Response;
 using EveryDaily.Application.Middleware;
 using EveryDaily.Application.Services.ControllerCommands.Auth.Commands;
 using EveryDaily.Application.Services.ControllerCommands.Auth.Queries;
@@ -84,6 +85,21 @@ public class AuthController(IMediator mediator)
         {
             VerificationCode = request.VerifyCode
         });
+        return CreateActionResultInstance(response);
+    }
+
+    [CustomAuthorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] UpdatePasswordResponse request)
+    {
+        var command = new UpdatePasswordCommand
+        {
+            OldPassword = request.OldPassword,
+            NewPassword = request.NewPassword,
+            NewPasswordConfirm = request.NewPasswordConfirm
+        };
+
+        var response = await mediator.Send(command);
         return CreateActionResultInstance(response);
     }
 }
