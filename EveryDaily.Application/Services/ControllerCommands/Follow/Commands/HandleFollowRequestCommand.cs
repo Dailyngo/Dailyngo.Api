@@ -1,4 +1,5 @@
-﻿using EveryDaily.Application.Services.UserService;
+﻿using EveryDaily.Application.Services.Notification;
+using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Entities.Follow;
 using EveryDaily.Persistence;
@@ -18,7 +19,8 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
     public class HandleFollowRequestCommandHandler(
         AppDbContext context,
         MongoDocContext mongoDocContext,
-        IUserService userService)
+        IUserService userService,
+        INotificationService notificationService)
         : IRequestHandler<HandleFollowRequestCommand, Response<NoContent>>
     {
         public async Task<Response<NoContent>> Handle(HandleFollowRequestCommand request,
@@ -46,9 +48,15 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Commands
                 await context.Follows.AddAsync(followEntity, cancellationToken);
                 await context.SaveChangesAsync(cancellationToken);
             }
+            await notificationService.RemoveFollowRequestNotificationAsync(
+            receiverId: followRequest.ReceiverId,
+            senderId: followRequest.SenderId,
+            relatedEntityId: followRequest.Id.ToString(), 
+            cancellationToken);
 
             await mongoDocContext.FollowRequests.Collection.DeleteOneAsync(f => f.Id == followRequest.Id,
                 new DeleteOptions(), cancellationToken);
+
 
             return Response<NoContent>.Success(200);
         }
