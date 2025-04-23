@@ -67,17 +67,27 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
                     .ToList(),
 
                 CommentNotifications = notifications
-                     .Where(n => n.Type == NotificationType.Comment)
-                     .Select(n => new CommentNotificationDto
-                     {
-                         SenderId = Guid.Parse(n.SenderId),
-                         SenderName = senderNames.First(sn => sn.Id == Guid.Parse(n.SenderId)).FullName,
-                         RelatedEntityId = n.RelatedEntityId,
-                         CommentText = (comments.FirstOrDefault(c => c.Id == ObjectId.Parse(n.RelatedEntityId))?.Content?.Length ?? "")> 50
-                            ? comments.FirstOrDefault(c => c.Id == ObjectId.Parse(n.RelatedEntityId)).Content.Substring(0, 50) + "..."
-                            : comments.FirstOrDefault(c => c.Id == ObjectId.Parse(n.RelatedEntityId)).Content
-                     })
-                 .ToList(),
+                .Where(n => n.Type == NotificationType.Comment)
+                .Select(n =>
+                {
+                    var senderIdGuid = Guid.Parse(n.SenderId);
+                    var senderName = senderNames.First(sn => sn.Id == senderIdGuid).FullName;
+                    var comment = comments.FirstOrDefault(c => c.Id == ObjectId.Parse(n.RelatedEntityId));
+
+                    return new CommentNotificationDto
+                    {
+                        SenderId = senderIdGuid,
+                        SenderName = senderName,
+                        RelatedEntityId = n.RelatedEntityId,
+                        CommentText = comment == null
+                            ? null
+                            : comment.Content?.Length > 50
+                                ? comment.Content.Substring(0, 50) + "..."
+                                : comment.Content
+                    };
+                })
+                .ToList(),
+
 
                 Likes = notifications
                     .Where(n => n.Type == NotificationType.Like)
