@@ -2,6 +2,7 @@ using EveryDaily.Application.Consumers;
 using EveryDaily.Application.Consumers.ConsumerMessages;
 using EveryDaily.Application.Services.Badge;
 using EveryDaily.Application.Services.Email;
+using EveryDaily.Application.Services.Notification;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
 using EveryDaily.Core.Settings;
@@ -104,5 +105,6 @@ public static class ConfigureExtensions
       services.AddTransient<IUserService, UserService>();
       services.AddTransient<IEmailService, EmailService>();
       services.AddScoped<IRankService, RankService>();
+      services.AddScoped<INotificationService, NotificationService>();
     }
 }

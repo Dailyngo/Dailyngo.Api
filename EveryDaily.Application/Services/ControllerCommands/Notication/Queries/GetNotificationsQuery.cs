@@ -78,7 +78,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
                     {
                         SenderId = senderIdGuid,
                         SenderName = senderName,
-                        RelatedEntityId = n.RelatedEntityId,
+                        RelatedEntityId = comment.PostId.ToString(),
                         CommentText = comment == null
                             ? null
                             : comment.Content?.Length > 50
