@@ -41,7 +41,7 @@ public class LoginCommandHandler(
 
         var token = await jwtTokenGenerator.GenerateToken(user);
         var refreshToken = await jwtTokenGenerator.GenerateRefreshToken(user);
-        
+
         return Core.Dtos.Response<LoginResponse>.Success(new LoginResponse()
         {
             IsSuccess = true,
