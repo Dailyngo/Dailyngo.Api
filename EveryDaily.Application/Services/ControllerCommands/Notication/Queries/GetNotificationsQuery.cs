@@ -2,6 +2,7 @@
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
 using EveryDaily.Core.Dtos;
+using EveryDaily.Domain.Documents.Post;
 using EveryDaily.Domain.Entities.Notification;
 using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Domain.Prefix.Redis;
@@ -9,6 +10,7 @@ using EveryDaily.Persistence;
 using EveryDaily.Persistence.MongoContext;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
@@ -34,11 +36,22 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
                     .Find(n => n.ReceiverId == userId.ToString()).ToListAsync(cancellationToken)
                 ;
 
-            var senderNames = await appDbContext.Users
+            var senderNames = await appDbContext.Users 
                 .Where(u => notifications.Select(x => Guid.Parse(x.SenderId)).Contains(u.Id))
                 .Select(u => new { u.FullName, u.Id }).ToListAsync(cancellationToken);
 
-           
+
+            var commentIds = notifications.Where(n => n.Type == NotificationType.Comment).Select(n =>ObjectId.Parse(n.RelatedEntityId));
+            var filter = Builders<CommentDoc>.Filter.And(
+            Builders<CommentDoc>.Filter.In(x => x.Id,commentIds),
+            Builders<CommentDoc>.Filter.Eq(x => x.IsDeleted, false)
+            );
+
+
+            var comments = await mongoDocContext.Comments.Collection
+           .Find(filter)
+
+           .ToListAsync(cancellationToken);
 
             var groupedNotifications = new NotificationResponse
             {
@@ -60,7 +73,9 @@ namespace EveryDaily.Application.Services.ControllerCommands.Notication.Queries
                          SenderId = Guid.Parse(n.SenderId),
                          SenderName = senderNames.First(sn => sn.Id == Guid.Parse(n.SenderId)).FullName,
                          RelatedEntityId = n.RelatedEntityId,
-                        // CommentText = n.Message
+                         CommentText = (comments.FirstOrDefault(c => c.Id == ObjectId.Parse(n.RelatedEntityId))?.Content?.Length ?? "")> 50
+                            ? comments.FirstOrDefault(c => c.Id == ObjectId.Parse(n.RelatedEntityId)).Content.Substring(0, 50) + "..."
+                            : comments.FirstOrDefault(c => c.Id == ObjectId.Parse(n.RelatedEntityId)).Content
                      })
                  .ToList(),
 
