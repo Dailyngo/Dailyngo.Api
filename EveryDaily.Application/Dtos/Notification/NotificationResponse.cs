@@ -1,16 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EveryDaily.Domain.Enums.Notification;
 
 namespace EveryDaily.Application.Dtos.Notification
 {
     public class NotificationResponse
     {
-        public List<FollowNotificationDto>? FollowRequests { get; set; }
-        public List<CommentNotificationDto>? CommentNotifications { get; set; }
-        public List<LikeNotificationDto>? Likes { get; set; }
-        public List<AnnouncementNotificationDto>? Announcements { get; set; }
+        public List<FollowNotificationDto> FollowRequests { get; set; } = new();
+        public List<BaseNotificationDto> OtherNotifications { get; set; } = new();
+    }
+
+    public class BaseNotificationDto
+    {
+        public Guid SenderId { get; set; }
+        public string? SenderName { get; set; }
+        public string? RelatedEntityId { get; set; }
+        public string? Text { get; set; } // CommentText, AnnouncementMessage gibi
+        public NotificationType NotificationType { get; set; }
+        public DateTimeOffset? CreatedAt { get; set; }
     }
 }

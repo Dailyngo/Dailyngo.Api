@@ -24,7 +24,9 @@ namespace EveryDaily.Application.Services.Notification
                 SenderId = userId,
                 Type = type,
                 RelatedEntityId = relatedEntityId,
-                IsDeleted = false
+                IsDeleted = false,
+                CreatedAt
+                = DateTime.UtcNow,
             };
 
             await mongoDocContext.Notifications.Collection.InsertOneAsync(notification, new(), cancellationToken);
@@ -41,5 +43,43 @@ namespace EveryDaily.Application.Services.Notification
                 cancellationToken
             );
         }
+
+        public async Task RemoveFollowRequestNotificationAsync(string receiverId, string senderId, string? relatedEntityId = null, CancellationToken cancellationToken = default)
+        {
+            var filterBuilder = Builders<NotificationEntity>.Filter;
+
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(n => n.ReceiverId, receiverId),
+                filterBuilder.Eq(n => n.SenderId, senderId),
+                filterBuilder.Eq(n => n.Type, NotificationType.Follow),
+                filterBuilder.Eq(n => n.IsDeleted, false)
+            );
+
+            if (!string.IsNullOrWhiteSpace(relatedEntityId))
+            {
+                filter = filterBuilder.And(
+                    filter,
+                    filterBuilder.Eq(n => n.RelatedEntityId, relatedEntityId)
+                );
+            }
+
+            var update = Builders<NotificationEntity>.Update
+                .Set(n => n.IsDeleted, true);
+
+            await mongoDocContext.Notifications.Collection.UpdateManyAsync(filter, update, cancellationToken: cancellationToken);
+
+            // Bildirim sayısını yeniden hesapla ve gönder
+            var unreadCount = await mongoDocContext.Notifications.Collection.CountDocumentsAsync(
+                n => n.ReceiverId == receiverId && !n.IsRead && !n.IsDeleted,
+                cancellationToken: cancellationToken);
+
+            await hubContext.Clients.Group(receiverId).SendAsync(
+                NotificationHubMethods.ReceiveNotification,
+                unreadCount,
+                cancellationToken);
+        }
     }
+
+    
+
 }
