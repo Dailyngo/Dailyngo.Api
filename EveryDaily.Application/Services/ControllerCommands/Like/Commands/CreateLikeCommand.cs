@@ -64,14 +64,17 @@ public class CreateLikeCommandHandler(
         await mongoDocContext.Posts.Collection.UpdateOneAsync(postFilter, updatePost,
             cancellationToken: cancellationToken);
 
-        await busControl.Publish(new RankActivityMessage()
+        if (userId.ToString() != post.UserId)
         {
-            UserId = Guid.Parse(post.UserId),
-            ActivityType = XpActivityType.like,
-        }, cancellationToken);
-
-        await notificationService.SendNotification(post.UserId.ToString(),
-            userId.ToString(), request.PostId.ToString(), NotificationType.Like,cancellationToken);
+            await busControl.Publish(new RankActivityMessage()
+            {
+                UserId = Guid.Parse(post.UserId),
+                ActivityType = XpActivityType.like,
+            }, cancellationToken);
+            
+            await notificationService.SendNotification(post.UserId.ToString(),
+                userId.ToString(), request.PostId.ToString(), NotificationType.Like,cancellationToken);
+        }
         
         return Core.Dtos.Response<NoContent>.Success(204);
     }
