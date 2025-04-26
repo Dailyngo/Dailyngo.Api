@@ -61,6 +61,7 @@ public class GetPostByIdQueryHandler(
             UserName = poster.UserName, 
             UserId = Guid.TryParse(post.UserId, out var parsedUserId) ? parsedUserId : Guid.Empty,
             Content = post.Content,
+            IsOwner = post.UserId == currentUserId,
             IsLiked = isLiked,
             PostDate = post.CreatedAt,
             LikeCount = post.LikeCount,

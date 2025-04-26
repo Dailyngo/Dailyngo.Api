@@ -27,6 +27,7 @@ public class GetUserPostQueryHandler(
         CancellationToken cancellationToken)
     {
         var userName = "";
+        var userId = userService.GetUserId();
         if (request.UserId.HasValue)
         {
             // todo user takip ediyor mu ya da hesabı gizli değilmi kontrolu yapılacak
@@ -48,7 +49,6 @@ public class GetUserPostQueryHandler(
         }
         else
         {
-            var userId = userService.GetUserId();
             var userExist = await appDbContext.Users
                 .Where(x => x.Id == userId && !x.IsDeleted)
                 .Select(x => new
@@ -103,6 +103,7 @@ public class GetUserPostQueryHandler(
             UserName = userName,
             UserId = request.UserId ?? userService.GetUserId(),
             Content = x.Content,
+            IsOwner = x.UserId == userId.ToString(),
             IsLiked = likeListGrouped
                 .FirstOrDefault(l => l.PostId == x.Id)?.LikeUserIds.Contains(userService.GetUserId().ToString()) ?? false,
             PostDate = x.CreatedAt,
