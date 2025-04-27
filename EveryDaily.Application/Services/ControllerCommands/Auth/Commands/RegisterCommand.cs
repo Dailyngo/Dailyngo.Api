@@ -29,7 +29,14 @@ public class RegisterCommandHandler(AppDbContext appDbContext, UserManager<UserE
         if (!request.Data.Password.Equals(request.Data.ConfirmPassword))
             return Response<NoContent>.Fail(AuthErrorMessage.PasswordsDoNotMatch);
 
-        var user = new UserEntity
+        var alreadyEmail = await appDbContext.Users
+            .AnyAsync(x => x.Email.ToLower().Equals(request.Data.Email.ToLower()), cancellationToken);
+        if (alreadyEmail)
+        {
+            return Response<NoContent>.Fail(AuthErrorMessage.EmailAlreadyExists);
+        }
+
+            var user = new UserEntity
         {
             Email = request.Data.Email,
             UserName = request.Data.UserName,
