@@ -41,11 +41,11 @@ public class GetPostLikerListCommandHandler(
         if (post == null)
             return Response<List<GetPostLikerResponse>>.Fail(PostErrorMessage.PostNotFound, 404);
 
-        if (post.UserId != userId.ToString())
-            return Response<List<GetPostLikerResponse>>.Fail(PostErrorMessage.NotPostOwner, 403);
+        // if (post.UserId != userId.ToString())
+        //     return Response<List<GetPostLikerResponse>>.Fail(PostErrorMessage.NotPostOwner, 403);
 
         var likerIds = await mongoDocContext.Likes.Collection
-            .Find(l => l.PostId == request.PostId && l.UserId == userId.ToString())
+            .Find(l => l.PostId == request.PostId)
             .Skip(skip)  
             .Limit(pageSize)
             .Project(l => l.UserId)

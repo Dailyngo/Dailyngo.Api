@@ -35,16 +35,16 @@ public class GetPostByIdQueryHandler(
         var post = await mongoDocContext.Posts.Collection
             .Find(filter)
             .FirstOrDefaultAsync(cancellationToken);
-
-        var posterUserId = Guid.Parse(post?.UserId);
+        
+        if (post == null)
+            return Response<GetUserPostResponse>.Fail("Gönderi bulunamadı.", 404);
+        
+        var posterUserId = Guid.Parse(post.UserId);
 
         var poster = await appDbContext.Users
-        .Select(x => new { x.Id, x.UserName })
-        .FirstOrDefaultAsync(x => x.Id == posterUserId, cancellationToken);
-
-        if (post == null)
-            return Response<GetUserPostResponse>.Fail("Post not found", 404);
-
+            .Select(x => new { x.Id, x.UserName })
+            .FirstOrDefaultAsync(x => x.Id == posterUserId, cancellationToken);
+        
         var likeFilter = Builders<LikeDoc>.Filter.And(
             Builders<LikeDoc>.Filter.Eq(x => x.PostId, post.Id),
             Builders<LikeDoc>.Filter.Eq(x => x.UserId, currentUserId),
@@ -61,6 +61,7 @@ public class GetPostByIdQueryHandler(
             UserName = poster.UserName, 
             UserId = Guid.TryParse(post.UserId, out var parsedUserId) ? parsedUserId : Guid.Empty,
             Content = post.Content,
+            IsOwner = post.UserId == currentUserId,
             IsLiked = isLiked,
             PostDate = post.CreatedAt,
             LikeCount = post.LikeCount,

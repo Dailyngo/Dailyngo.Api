@@ -171,6 +171,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseResponseCaching();
 app.UseAuthentication();
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<JwtMiddleware>();
 app.UseAuthorization();
 app.MapControllers();

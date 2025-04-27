@@ -13,9 +13,10 @@ using EveryDaily.Application.Services.UserService;
 
 namespace EveryDaily.Application.Services.Badge
 {
-    public class RankService(AppDbContext dbContext,ICacheService cacheService,IUserService userService) : IRankService
+    public class RankService(AppDbContext dbContext, ICacheService cacheService) : IRankService
     {
-        public async Task ProcessActivityAsync(Guid userId, XpActivityType activityType, CancellationToken cancellationToken)
+        public async Task ProcessActivityAsync(Guid userId, XpActivityType activityType,
+            CancellationToken cancellationToken)
         {
             var cacheKey = RedisPrefix.GetUserRankActivityKey(userId, activityType);
             var userActivity = await cacheService.GetAsync(cacheKey);
@@ -73,7 +74,8 @@ namespace EveryDaily.Application.Services.Badge
 
             if (activityType == XpActivityType.login)
             {
-                alreadyDoneToday = await dbContext.UserDailyLoginHistories.AnyAsync(x => x.UserId == userId && x.LoginDate == today);
+                alreadyDoneToday =
+                    await dbContext.UserDailyLoginHistories.AnyAsync(x => x.UserId == userId && x.LoginDate == today);
 
                 if (!alreadyDoneToday)
                 {
@@ -95,7 +97,8 @@ namespace EveryDaily.Application.Services.Badge
             }
             else if (activityType == XpActivityType.post)
             {
-                alreadyDoneToday = await dbContext.UserDailyPostHistories.AnyAsync(x => x.UserId == userId && x.PostDate == today);
+                alreadyDoneToday =
+                    await dbContext.UserDailyPostHistories.AnyAsync(x => x.UserId == userId && x.PostDate == today);
 
                 if (!alreadyDoneToday)
                 {
@@ -117,19 +120,12 @@ namespace EveryDaily.Application.Services.Badge
             }
             else if (activityType == XpActivityType.like || activityType == XpActivityType.comment)
             {
-
-                // XP sadece bir kez değil, her etkileşimde verilsin isteniyorsa cache kontrolü yapılmayabilir
-                // Eğer gün içinde sadece 1 kez XP verilecekse yukarıdaki gibi cache key kullanılabilir.
-
-                if(userId == userService.GetUserId())
-                    return;
-
                 int gainedXp = baseXp;
                 xpStatus.TotalXp += gainedXp;
                 xpStatus.Rank = GetRank(xpStatus.TotalXp);
                 await dbContext.UserXpHistories.AddAsync(new UserXpHistoryEntity
                 {
-                    UserId = userService.GetUserId(),
+                    UserId = userId,
                     Date = today,
                     XpGained = gainedXp,
                     Source = activityType
@@ -160,7 +156,9 @@ namespace EveryDaily.Application.Services.Badge
                 await dbContext.SaveChangesAsync();
             }
         }
-        public async Task<List<UserRankResponse>> GetUserRankAsync(Guid userId, bool old, CancellationToken cancellationToken)
+
+        public async Task<List<UserRankResponse>> GetUserRankAsync(Guid userId, bool old,
+            CancellationToken cancellationToken)
         {
             List<UserRankResponse> userRankDtos = new List<UserRankResponse>();
             //
@@ -222,6 +220,7 @@ namespace EveryDaily.Application.Services.Badge
 
             return userRankDtos;
         }
+
         private RankEnum GetRank(int totalXp)
         {
             return totalXp switch
@@ -231,6 +230,7 @@ namespace EveryDaily.Application.Services.Badge
                 _ => RankEnum.bronze
             };
         }
+
         private TimeSpan GetTimeUntilMidnight()
         {
             var now = DateTime.UtcNow;

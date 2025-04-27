@@ -69,13 +69,16 @@ public class CreateCommentCommandHandler(
         var updatePost = Builders<PostDoc>.Update.Inc(x => x.CommentCount, 1);
         await mongoDocContext.Posts.Collection.UpdateOneAsync(postFilter, updatePost, cancellationToken: cancellationToken);
 
-        await busControl.Publish(new RankActivityMessage
+        if (post.UserId != userId.ToString())
         {
-            UserId = Guid.Parse(post.UserId),
-            ActivityType = XpActivityType.comment,
-        }, cancellationToken);
+            await busControl.Publish(new RankActivityMessage
+            {
+                UserId = Guid.Parse(post.UserId),
+                ActivityType = XpActivityType.comment,
+            }, cancellationToken);
         
-        await notificationService.SendNotification(post.UserId,userId.ToString(),comment.Id.ToString(),NotificationType.Comment,cancellationToken);
+            await notificationService.SendNotification(post.UserId,userId.ToString(),comment.Id.ToString(),NotificationType.Comment,cancellationToken);
+        }
 
         return Core.Dtos.Response<NoContent>.Success(204);
     }

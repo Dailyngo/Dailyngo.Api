@@ -41,6 +41,7 @@ public class GetPostCommentQueryHandler(MongoDocContext mongoDocContext,IUserSer
 
         var comments = await mongoDocContext.Comments.Collection
             .Find(filter)
+            .SortByDescending(x => x.CreatedAt)
             .Skip(skip)
             .Limit(pageSize)
             .ToListAsync(cancellationToken);
