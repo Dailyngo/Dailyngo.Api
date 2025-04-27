@@ -24,9 +24,11 @@ namespace EveryDaily.Application.Services.ControllerCommands.User.Queries
             var searchTerm = request.SearchTerm.ToLower();
 
             var response = await appDbContext.Users
-               .Where(x => x.Name.ToLower().Contains(searchTerm) ||
-                    x.Surname.ToLower().Contains(searchTerm) ||
-                    x.UserName.ToLower().Contains(searchTerm))
+               .Where(x => (x.Name.ToLower().Contains(searchTerm) ||
+                            x.Surname.ToLower().Contains(searchTerm) ||
+                            x.UserName.ToLower().Contains(searchTerm))
+                            && !x.IsDeleted
+                    )
                 .Select(u => new SearchUserResponse
                 {
                     Id = u.Id,

@@ -80,7 +80,6 @@ public class GetUserPostQueryHandler(
         var postList = await postsCursor.ToListAsync(cancellationToken: cancellationToken);
 
         var likeFilter = Builders<LikeDoc>.Filter.And(
-            Builders<LikeDoc>.Filter.Eq(x => x.UserId, request.UserId.Value.ToString()),
             Builders<LikeDoc>.Filter.Eq(x => x.IsDeleted, false),
             Builders<LikeDoc>.Filter.In(p => p.PostId, postList.Select(x => x.Id)));
 

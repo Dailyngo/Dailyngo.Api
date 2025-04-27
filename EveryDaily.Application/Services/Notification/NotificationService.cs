@@ -51,8 +51,7 @@ namespace EveryDaily.Application.Services.Notification
             var filter = filterBuilder.And(
                 filterBuilder.Eq(n => n.ReceiverId, receiverId),
                 filterBuilder.Eq(n => n.SenderId, senderId),
-                filterBuilder.Eq(n => n.Type, NotificationType.Follow),
-                filterBuilder.Eq(n => n.IsDeleted, false)
+                filterBuilder.Eq(n => n.Type, NotificationType.Follow)
             );
 
             if (!string.IsNullOrWhiteSpace(relatedEntityId))
@@ -63,14 +62,12 @@ namespace EveryDaily.Application.Services.Notification
                 );
             }
 
-            var update = Builders<NotificationEntity>.Update
-                .Set(n => n.IsDeleted, true);
-
-            await mongoDocContext.Notifications.Collection.UpdateManyAsync(filter, update, cancellationToken: cancellationToken);
+            // Bildirimi tamamen sil
+            await mongoDocContext.Notifications.Collection.DeleteManyAsync(filter, cancellationToken);
 
             // Bildirim sayısını yeniden hesapla ve gönder
             var unreadCount = await mongoDocContext.Notifications.Collection.CountDocumentsAsync(
-                n => n.ReceiverId == receiverId && !n.IsRead && !n.IsDeleted,
+                n => n.ReceiverId == receiverId && !n.IsRead,
                 cancellationToken: cancellationToken);
 
             await hubContext.Clients.Group(receiverId).SendAsync(
@@ -78,8 +75,9 @@ namespace EveryDaily.Application.Services.Notification
                 unreadCount,
                 cancellationToken);
         }
+
     }
 
-    
+
 
 }

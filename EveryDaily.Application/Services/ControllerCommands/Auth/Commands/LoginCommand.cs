@@ -28,7 +28,9 @@ public class LoginCommandHandler(
     public async Task<Core.Dtos.Response<LoginResponse>> Handle(LoginCommand request,
         CancellationToken cancellationToken)
     {
-        var user = await appDbContext.Users.FirstOrDefaultAsync(
+        var user = await appDbContext.Users
+            .Where(x => !x.IsDeleted)
+            .FirstOrDefaultAsync(
             x => x.Email == request.EmailOrUserName || x.UserName == request.EmailOrUserName,
             cancellationToken: cancellationToken);
 
