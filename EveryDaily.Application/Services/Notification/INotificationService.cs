@@ -6,5 +6,7 @@ namespace EveryDaily.Application.Services.Notification
     {
         public Task SendNotification(string receiverId, string userId, string relatedEntityId, NotificationType type, CancellationToken cancellationToken);
         public Task RemoveFollowRequestNotificationAsync(string receiverId, string senderId, string? relatedEntityId = null, CancellationToken cancellationToken = default);
+        public Task RemoveLikeNotificationAsync(string receiverId, string senderId, string? relatedEntityId = null, CancellationToken cancellationToken = default);
+        public Task RemoveCommentNotificationAsync(string receiverId, string senderId, string? relatedEntityId = null, CancellationToken cancellationToken = default);
     }
 }

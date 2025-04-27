@@ -77,7 +77,11 @@ public class CreateCommentCommandHandler(
                 ActivityType = XpActivityType.comment,
             }, cancellationToken);
         
-            await notificationService.SendNotification(post.UserId,userId.ToString(),comment.Id.ToString(),NotificationType.Comment,cancellationToken);
+            await notificationService.SendNotification(
+                post.UserId,
+                userId.ToString(),
+                comment.Id.ToString()
+                ,NotificationType.Comment,cancellationToken);
         }
 
         return Core.Dtos.Response<NoContent>.Success(204);

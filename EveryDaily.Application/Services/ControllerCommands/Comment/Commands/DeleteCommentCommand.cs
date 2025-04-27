@@ -1,6 +1,8 @@
+using EveryDaily.Application.Services.Notification;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Documents.Post;
+using EveryDaily.Domain.Enums.Notification;
 using EveryDaily.Domain.Prefix.ErrorMessage;
 using EveryDaily.Persistence.MongoContext;
 using MediatR;
@@ -14,7 +16,7 @@ public class DeleteCommentCommand : IRequest<Response<NoContent>>
     public ObjectId Id { get; set; }
 }
 
-public class DeleteCommentCommandHandler(MongoDocContext mongoDocContext, IUserService userService)
+public class DeleteCommentCommandHandler(MongoDocContext mongoDocContext, IUserService userService, INotificationService notificationService)
     : IRequestHandler<DeleteCommentCommand, Response<NoContent>>
 {
     public async Task<Response<NoContent>> Handle(DeleteCommentCommand request, CancellationToken cancellationToken)
@@ -27,7 +29,7 @@ public class DeleteCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
 
         if (comment == null)
             return Response<NoContent>.Fail(CommentErrorMessage.CommentNotFound, 404);
-        
+
         var update = Builders<CommentDoc>.Update
             .Set(p => p.UpdatedAt, DateTimeOffset.UtcNow)
             .Set(p => p.IsDeleted, true);
@@ -49,14 +51,25 @@ public class DeleteCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
 
         await mongoDocContext.Comments.Collection.UpdateManyAsync(replyFilter, replyUpdate,
             cancellationToken: cancellationToken);
-        
+
         var updatePost = Builders<PostDoc>.Update
             .Inc(p => p.CommentCount, -1);
 
         var postFilter = Builders<PostDoc>.Filter.Eq(p => p.Id, comment.PostId);
-        
+
         await mongoDocContext.Posts.Collection.UpdateOneAsync(postFilter, updatePost,
             cancellationToken: cancellationToken);
+
+        var postUserId = await mongoDocContext.Posts.Collection
+            .Find(postFilter)
+            .Project(p => p.UserId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        await notificationService.RemoveCommentNotificationAsync(
+            postUserId.ToString(),
+            userId.ToString(),
+            comment.Id.ToString(),
+            cancellationToken);
 
         return Response<NoContent>.Success(200);
     }

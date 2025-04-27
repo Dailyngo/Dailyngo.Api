@@ -1,3 +1,4 @@
+using EveryDaily.Application.Services.Notification;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Domain.Documents.Post;
@@ -14,7 +15,7 @@ public class RemoveLikeCommand : IRequest<Response<NoContent>>
     public ObjectId PostId { get; set; }
 }
 
-public class RemoveLikeCommandHandler(MongoDocContext mongoDocContext, IUserService userService)
+public class RemoveLikeCommandHandler(MongoDocContext mongoDocContext, IUserService userService,INotificationService notificationService)
     : IRequestHandler<RemoveLikeCommand, Response<NoContent>>
 {
     public async Task<Response<NoContent>> Handle(RemoveLikeCommand request, CancellationToken cancellationToken)
@@ -50,6 +51,12 @@ public class RemoveLikeCommandHandler(MongoDocContext mongoDocContext, IUserServ
 
         await mongoDocContext.Posts.Collection.UpdateOneAsync(postFilter, updatePost,
             cancellationToken: cancellationToken);
+
+        await notificationService.RemoveCommentNotificationAsync(
+        like.UserId,
+        userId.ToString(),     
+        like.Id.ToString(),
+        cancellationToken);
 
         return Response<NoContent>.Success(200);
     }

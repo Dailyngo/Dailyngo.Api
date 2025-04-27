@@ -75,9 +75,64 @@ namespace EveryDaily.Application.Services.Notification
                 unreadCount,
                 cancellationToken);
         }
+        public async Task RemoveLikeNotificationAsync(string receiverId, string senderId, string? relatedEntityId = null, CancellationToken cancellationToken = default)
+        {
+            var filterBuilder = Builders<NotificationEntity>.Filter;
 
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(n => n.ReceiverId, receiverId),
+                filterBuilder.Eq(n => n.SenderId, senderId),
+                filterBuilder.Eq(n => n.Type, NotificationType.Like)
+            );
+
+            if (!string.IsNullOrWhiteSpace(relatedEntityId))
+            {
+                filter = filterBuilder.And(
+                    filter,
+                    filterBuilder.Eq(n => n.RelatedEntityId, relatedEntityId)
+                );
+            }
+
+            await mongoDocContext.Notifications.Collection.DeleteManyAsync(filter, cancellationToken);
+
+            var unreadCount = await mongoDocContext.Notifications.Collection.CountDocumentsAsync(
+                n => n.ReceiverId == receiverId && !n.IsRead,
+                cancellationToken: cancellationToken);
+
+            await hubContext.Clients.Group(receiverId).SendAsync(
+                NotificationHubMethods.ReceiveNotification,
+                unreadCount,
+                cancellationToken);
+        }
+        public async Task RemoveCommentNotificationAsync(string receiverId, string senderId, string? relatedEntityId = null, CancellationToken cancellationToken = default)
+        {
+            var filterBuilder = Builders<NotificationEntity>.Filter;
+
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(n => n.ReceiverId, receiverId),
+                filterBuilder.Eq(n => n.SenderId, senderId),
+                filterBuilder.Eq(n => n.Type, NotificationType.Comment)
+            );
+
+            if (!string.IsNullOrWhiteSpace(relatedEntityId))
+            {
+                filter = filterBuilder.And(
+                    filter,
+                    filterBuilder.Eq(n => n.RelatedEntityId, relatedEntityId)
+                );
+            }
+
+            await mongoDocContext.Notifications.Collection.DeleteManyAsync(filter, cancellationToken);
+
+            var unreadCount = await mongoDocContext.Notifications.Collection.CountDocumentsAsync(
+                n => n.ReceiverId == receiverId && !n.IsRead,
+                cancellationToken: cancellationToken);
+
+            await hubContext.Clients.Group(receiverId).SendAsync(
+                NotificationHubMethods.ReceiveNotification,
+                unreadCount,
+                cancellationToken);
+        }
     }
-
-
-
+    
 }
