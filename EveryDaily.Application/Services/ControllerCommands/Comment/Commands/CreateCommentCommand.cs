@@ -66,7 +66,14 @@ public class CreateCommentCommandHandler(
         
         await mongoDocContext.Comments.Collection.InsertOneAsync(comment, cancellationToken: cancellationToken);
 
-        var updatePost = Builders<PostDoc>.Update.Inc(x => x.CommentCount, 1);
+        var activeCommentCount = await mongoDocContext.Comments.Collection
+            .CountDocumentsAsync(Builders<CommentDoc>.Filter.And(
+                Builders<CommentDoc>.Filter.Eq(p => p.PostId, comment.PostId),
+                Builders<CommentDoc>.Filter.Eq(p => p.IsDeleted, false)),
+                cancellationToken: cancellationToken);
+
+        var updatePost = Builders<PostDoc>.Update.Set(x => x.CommentCount, activeCommentCount);
+
         await mongoDocContext.Posts.Collection.UpdateOneAsync(postFilter, updatePost, cancellationToken: cancellationToken);
 
         if (post.UserId != userId.ToString())
