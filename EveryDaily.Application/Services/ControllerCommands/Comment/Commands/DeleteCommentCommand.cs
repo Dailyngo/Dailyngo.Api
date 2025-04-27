@@ -52,8 +52,14 @@ public class DeleteCommentCommandHandler(MongoDocContext mongoDocContext, IUserS
         await mongoDocContext.Comments.Collection.UpdateManyAsync(replyFilter, replyUpdate,
             cancellationToken: cancellationToken);
 
+        var activeCommentCount = await mongoDocContext.Comments.Collection
+            .CountDocumentsAsync(Builders<CommentDoc>.Filter.And(
+                Builders<CommentDoc>.Filter.Eq(p => p.PostId, comment.PostId),
+                Builders<CommentDoc>.Filter.Eq(p => p.IsDeleted, false)),
+                cancellationToken: cancellationToken);
+
         var updatePost = Builders<PostDoc>.Update
-            .Inc(p => p.CommentCount, -1);
+            .Set(p => p.CommentCount, activeCommentCount);
 
         var postFilter = Builders<PostDoc>.Filter.Eq(p => p.Id, comment.PostId);
 
