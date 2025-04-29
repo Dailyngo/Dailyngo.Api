@@ -28,6 +28,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.User.Queries
                             x.Surname.ToLower().Contains(searchTerm) ||
                             x.UserName.ToLower().Contains(searchTerm))
                             && !x.IsDeleted
+&& x.EmailConfirmed
                     )
                 .Select(u => new SearchUserResponse
                 {
