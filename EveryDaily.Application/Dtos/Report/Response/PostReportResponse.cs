@@ -9,4 +9,5 @@ public class PostReportResponse
     public IdNameResponse<Guid> ReportedBy { get; set; }
     public string? Reason { get; set; }
     public bool IsProcess { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }

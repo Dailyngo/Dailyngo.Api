@@ -47,6 +47,7 @@ public class GetPostReportQueryHandler(MongoDocContext mongoDocContext,AppDbCont
                     Id = Guid.Empty,
                     Name = "Bilinmeyen Kullanıcı"
                 },
+            CreatedAt = x.CreatedAt.Value
         }).ToList();
         
         return Response<List<PostReportResponse>>.Success(postReportResponses, 200);
