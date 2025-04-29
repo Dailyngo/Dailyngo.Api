@@ -17,4 +17,5 @@ public class MongoDocContext(IOptions<MongoDbSettings> options)
     public DocSet<TestModel> TestModels => Create<TestModel>();
     public DocSet<NotificationEntity> Notifications => Create<NotificationEntity>();
     public DocSet<FollowRequestEntity> FollowRequests => Create<FollowRequestEntity>();
+    public DocSet<ReportDoc> Reports => Create<ReportDoc>();
 }

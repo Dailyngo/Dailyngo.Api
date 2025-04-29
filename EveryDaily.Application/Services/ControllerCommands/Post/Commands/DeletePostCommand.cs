@@ -12,6 +12,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Post.Commands;
 public class DeletePostCommand : IRequest<Response<NoContent>>
 {
     public ObjectId Id { get; set; }
+    public bool IsAdmin { get; set; }
 }
 
 public class DeletePostCommandHandler(MongoDocContext mongoDocContext, IUserService userService)
@@ -24,11 +25,16 @@ public class DeletePostCommandHandler(MongoDocContext mongoDocContext, IUserServ
         var update = Builders<PostDoc>.Update
             .Set(p => p.UpdatedAt, DateTimeOffset.UtcNow)
             .Set(p => p.IsDeleted, true);
+
+        var filter = Builders<PostDoc>.Filter.Eq(p => p.Id, request.Id);
         
-        var filter = Builders<PostDoc>.Filter.And(
-            Builders<PostDoc>.Filter.Eq(p => p.Id, request.Id),
-            Builders<PostDoc>.Filter.Eq(p => p.UserId, userId.ToString())
-        );
+        if (!request.IsAdmin)
+        {
+            filter = Builders<PostDoc>.Filter.And(
+                filter,
+                Builders<PostDoc>.Filter.Eq(p => p.UserId, userId.ToString())
+            );
+        }
 
         var result =
             await mongoDocContext.Posts.Collection.UpdateOneAsync(filter, update,
