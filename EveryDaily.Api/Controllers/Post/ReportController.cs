@@ -1,8 +1,10 @@
 using EveryDaily.Application.Dtos.Report.Request;
+using EveryDaily.Application.Middleware;
 using EveryDaily.Application.Services.ControllerCommands.Post.Commands;
 using EveryDaily.Application.Services.ControllerCommands.Report.Commands;
 using EveryDaily.Application.Services.ControllerCommands.Report.Queries;
 using EveryDaily.Core.ControllerBases;
+using EveryDaily.Domain.Permissions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +31,7 @@ public class ReportController(IMediator mediator)
     }
 
     [HttpPost("{postId}/setprocess")]
+    [CustomAuthorize<Permission>(Permission.SuperAdmin)]
     public async Task<IActionResult> ReportComment([FromRoute] string postId)
     {
         var result = await mediator.Send(new SetPostReportProcessCommand()
@@ -40,6 +43,7 @@ public class ReportController(IMediator mediator)
     }
     
     [HttpGet]
+    [CustomAuthorize<Permission>(Permission.SuperAdmin)]
     public async Task<IActionResult> GetPostReports()
     {
         var result = await mediator.Send(new GetPostReportQuery());
@@ -48,6 +52,7 @@ public class ReportController(IMediator mediator)
     }
     
     [HttpDelete("{postId}")]
+    [CustomAuthorize<Permission>(Permission.SuperAdmin)]
     public async Task<IActionResult> DeletePost([FromRoute] string postId)
     {
         var result = await mediator.Send(new DeletePostCommand()

@@ -1,6 +1,11 @@
 using System.Text.RegularExpressions;
+using EveryDaily.Application.Services.UserService;
+using EveryDaily.Domain.Entities;
+using EveryDaily.Domain.Permissions;
+using EveryDaily.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -15,7 +20,12 @@ public class CustomAuthorizeAttribute<T> : TypeFilterAttribute where T : Enum
 }
 public class CustomAuthorizeAttribute() : TypeFilterAttribute(typeof(CustomAuthorizeFilter));
 
-public class CustomAuthorizeFilter() : IAsyncAuthorizationFilter
+public class CustomAuthorizeFilter(
+    AppDbContext dbContext,
+    UserManager<UserEntity> userManager,
+    IUserService userService,
+    params object[] perms)
+    : IAsyncAuthorizationFilter
 {
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
@@ -25,7 +35,25 @@ public class CustomAuthorizeFilter() : IAsyncAuthorizationFilter
             context.HttpContext.Response.ContentType = "application/json";
             await context.HttpContext.Response.WriteAsJsonAsync(new { message = "Unauthorized" });
         }
-
-        new AuthorizeAttribute();
+        // var userId = userService.GetUserId();
+        // var user = await userManager.FindByIdAsync(userId.ToString());
+        // if (user == null)
+        // {
+        //     context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
+        //     return;
+        // }
+        //
+        // var roles = await userManager.GetRolesAsync(user);
+        //
+        // foreach (var perm in perms)
+        // {
+        //     var permStr = perm.ToString();
+        //     if (roles.Contains(permStr))
+        //     {
+        //         return;
+        //     }
+        // }
+        //
+        // context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
     }
 }
