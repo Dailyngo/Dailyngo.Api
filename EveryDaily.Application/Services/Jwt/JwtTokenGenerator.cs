@@ -28,6 +28,7 @@ public class JwtTokenGenerator(
     {
         try
         {
+            var userRole = await userManager.GetRolesAsync(user);
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -37,7 +38,8 @@ public class JwtTokenGenerator(
                 new Claim("username", user.UserName ?? ""),
                 new Claim("phone", string.Empty),
                 new Claim("given_name", user.Name ?? ""),
-                new Claim("surname", user.Surname ?? "")
+                new Claim("surname", user.Surname ?? ""),
+                new Claim("roles", string.Join(",", userRole)),
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.Secret));
