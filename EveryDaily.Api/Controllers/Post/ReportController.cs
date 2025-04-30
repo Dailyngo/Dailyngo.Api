@@ -52,7 +52,8 @@ public class ReportController(IMediator mediator)
     {
         var result = await mediator.Send(new DeletePostCommand()
         {
-            Id = ObjectId.Parse(postId)
+            Id = ObjectId.Parse(postId),
+            IsAdmin = true
         });
         
         return CreateActionResultInstance(result);
