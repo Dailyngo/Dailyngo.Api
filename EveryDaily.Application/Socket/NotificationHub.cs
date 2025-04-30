@@ -1,4 +1,5 @@
-﻿using EveryDaily.Application.Services.UserService;
+﻿using System.Collections.Concurrent;
+using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core;
 using EveryDaily.Domain.Prefix.Redis;
 using EveryDaily.Domain.Prefix.Socket;
@@ -13,6 +14,7 @@ namespace EveryDaily.Application.Socket
         private readonly MongoDocContext _mongoDocContext;
         private readonly IRedisService _redisService;
         private readonly IUserService _userService;
+        public static readonly ConcurrentDictionary<string, HashSet<string>> OnlineUsers = new();
 
         public NotificationHub(IRedisService redisService, IUserService userService, MongoDocContext mongoDocContext)
         {
@@ -27,14 +29,26 @@ namespace EveryDaily.Application.Socket
         public override async Task OnConnectedAsync()
         {
             var userId = _userService.GetUserId().ToString();
+            var connectionId = Context.ConnectionId;
 
             // Kullanıcıyı kendi ID'siyle gruba ekle
-            await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+            await Groups.AddToGroupAsync(connectionId, userId);
+
+            // OnlineUsers'a ekle (çoklu bağlantı destekli)
+            OnlineUsers.AddOrUpdate(userId,
+                (_) => new HashSet<string> { connectionId },
+                (_, set) =>
+                {
+                    lock (set)
+                    {
+                        set.Add(connectionId);
+                    }
+                    return set;
+                });
 
             await base.OnConnectedAsync();
             await SendOfflineNotifications(userId);
         }
-
         /// <summary>
         /// Kullanıcı bağlantıyı kapattığında gruptan çıkar
         /// </summary>
@@ -44,6 +58,19 @@ namespace EveryDaily.Application.Socket
 
             // Kullanıcıyı grubundan çıkar
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
+            
+            var connectionId = Context.ConnectionId;
+            if (OnlineUsers.TryGetValue(userId, out var set))
+            {
+                lock (set)
+                {
+                    set.Remove(connectionId);
+                    if (set.Count == 0)
+                    {
+                        OnlineUsers.TryRemove(userId, out _);
+                    }
+                }
+            }
 
             await base.OnDisconnectedAsync(exception);
         }
