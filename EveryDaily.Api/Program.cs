@@ -33,6 +33,7 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailOptions"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
+builder.Services.ConfigureNpgsql(builder.Configuration);
 builder.Services.AddIdentity<UserEntity, RoleEntity>(options =>
     {
         options.Tokens.PasswordResetTokenProvider = "passwordReset";
@@ -124,7 +125,6 @@ builder.Services.AddSwaggerGen(setup =>
 var dailyngoCors = "DailyngoCors";
 builder.Services.ConfigureRedis(builder.Configuration);
 builder.Services.ConfigureMassTransit(builder.Configuration);
-builder.Services.ConfigureNpgsql(builder.Configuration);
 builder.Services.ConfigureCors(dailyngoCors);
 builder.Services.ConfigureMongoDbRepositories(builder.Configuration);
 builder.Services.ConfigureServices();
@@ -171,10 +171,11 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseResponseCaching();
 app.UseAuthentication();
-app.UseMiddleware<ExceptionMiddleware>();
-app.UseMiddleware<JwtMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
+
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<JwtMiddleware>();
 
 app.MapHub<NotificationHub>("/notification-hub");
 

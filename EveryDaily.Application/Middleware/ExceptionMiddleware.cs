@@ -22,7 +22,7 @@ public class ExceptionMiddleware(RequestDelegate next)
 
     private Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        var response = Response<string>.Fail($"Internal Server Error. ErrorDetail:{exception.Message}",500);
+        var response = Response<string>.Fail($"Internal Server Error. ErrorDetail:{exception}",500);
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

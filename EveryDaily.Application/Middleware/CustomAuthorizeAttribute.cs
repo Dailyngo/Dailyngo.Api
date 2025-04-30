@@ -13,18 +13,17 @@ namespace EveryDaily.Application.Middleware;
 
 public class CustomAuthorizeAttribute<T> : TypeFilterAttribute where T : Enum
 {
-    public CustomAuthorizeAttribute(params T[] perms) : base(typeof(CustomAuthorizeFilter))
+    public CustomAuthorizeAttribute(params T[] perms) : base(typeof(CustomAuthorizeFilter<T>))
     {
         Arguments = new object[] { perms };
     }
 }
-public class CustomAuthorizeAttribute() : TypeFilterAttribute(typeof(CustomAuthorizeFilter));
 
-public class CustomAuthorizeFilter(
+public class CustomAuthorizeFilter<T>(
     AppDbContext dbContext,
     UserManager<UserEntity> userManager,
     IUserService userService,
-    params object[] perms)
+    params T[] perms)
     : IAsyncAuthorizationFilter
 {
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -35,25 +34,25 @@ public class CustomAuthorizeFilter(
             context.HttpContext.Response.ContentType = "application/json";
             await context.HttpContext.Response.WriteAsJsonAsync(new { message = "Unauthorized" });
         }
-        // var userId = userService.GetUserId();
-        // var user = await userManager.FindByIdAsync(userId.ToString());
-        // if (user == null)
-        // {
-        //     context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
-        //     return;
-        // }
-        //
-        // var roles = await userManager.GetRolesAsync(user);
-        //
-        // foreach (var perm in perms)
-        // {
-        //     var permStr = perm.ToString();
-        //     if (roles.Contains(permStr))
-        //     {
-        //         return;
-        //     }
-        // }
-        //
-        // context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
+        var userId = userService.GetUserId();
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
+            return;
+        }
+        
+        var roles = await userManager.GetRolesAsync(user);
+        
+        foreach (var perm in perms)
+        {
+            var permStr = perm.ToString();
+            if (roles.Contains(permStr))
+            {
+                return;
+            }
+        }
+        
+        context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
     }
 }

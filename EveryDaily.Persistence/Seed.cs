@@ -1,4 +1,6 @@
+using System.Reflection;
 using EveryDaily.Domain.Entities;
+using EveryDaily.Domain.Permissions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +11,7 @@ public static class Seed
 {
     public static async Task SeedCollectorData(IServiceProvider serviceProvider)
     {
+        await SeedRoles(serviceProvider);
         await SeedUserData(serviceProvider);
         await SeedEducationData(serviceProvider);
     }
@@ -38,8 +41,22 @@ public static class Seed
             };
 
             var result = await userManager.CreateAsync(user, "P@ssw0rd");
-            if (result.Succeeded) Console.WriteLine("Admin user created.");
-            else result.Errors.ToList().ForEach(error => Console.WriteLine(error.Description));
+            
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, Permission.SuperAdmin.ToString());
+            }
+        }
+        else
+        {
+            var user = await userManager.FindByNameAsync("admin");
+            if (user == null) return;
+            
+            var roles = await userManager.GetRolesAsync(user);
+            if (!roles.Contains(Permission.SuperAdmin.ToString()))
+            {
+                await userManager.AddToRoleAsync(user, Permission.SuperAdmin.ToString());
+            }
         }
     }
 
@@ -102,5 +119,30 @@ public static class Seed
         
         await appDbContext.Departments.AddRangeAsync(departments);
         await appDbContext.SaveChangesAsync();
+    }
+    
+    private static async Task SeedRoles(IServiceProvider serviceProvider)
+    {
+        var scope = serviceProvider.CreateScope();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<RoleEntity>>();
+
+        var defaultRoles = Enum.GetValues(typeof(Permission)).Cast<Permission>().Select(x => x.ToString()).ToList();
+        
+        var existRoles = await roleManager.Roles.Select(x => x.Name).ToListAsync();
+        
+        var rolesToAdd = defaultRoles.Where(x => !existRoles.Contains(x)).ToList();
+        
+        if (rolesToAdd.Count == 0) return;
+        
+        foreach (var role in rolesToAdd)
+        {
+            await roleManager.CreateAsync(new()
+            {
+                CreatedAt = DateTimeOffset.UtcNow,
+                Name = role,
+                NormalizedName = role.ToUpper(),
+                ConcurrencyStamp = Guid.NewGuid().ToString()
+            });
+        }
     }
 }

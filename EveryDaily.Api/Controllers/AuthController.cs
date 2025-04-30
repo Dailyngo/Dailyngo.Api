@@ -62,7 +62,7 @@ public class AuthController(IMediator mediator)
     }
 
     [HttpGet("user-login-info")]
-    [CustomAuthorize]
+    [Authorize]
     public async Task<IActionResult> GetUserLoginInfo()
     {
         var response = await mediator.Send(new GetUserLoginInfoQuery());
@@ -70,14 +70,14 @@ public class AuthController(IMediator mediator)
     }
     
     [HttpGet("send-verification-email")]
-    [CustomAuthorize]
+    [Authorize]
     public async Task<IActionResult> SendVerificationEmail()
     {
         var response = await mediator.Send(new SendVerificationEmailCommand());
         return CreateActionResultInstance(response);
     }
     
-    [CustomAuthorize]
+    [Authorize]
     [HttpPost("verify-email")]
     public async Task<IActionResult> EmailConfirmation([FromBody] EmailVerifyRequest request)
     {
@@ -88,7 +88,7 @@ public class AuthController(IMediator mediator)
         return CreateActionResultInstance(response);
     }
 
-    [CustomAuthorize]
+    [Authorize]
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] UpdatePasswordResponse request)
     {
