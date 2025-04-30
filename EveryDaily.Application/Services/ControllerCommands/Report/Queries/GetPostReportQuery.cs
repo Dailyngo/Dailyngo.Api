@@ -42,26 +42,27 @@ public class GetPostReportQueryHandler(MongoDocContext mongoDocContext, AppDbCon
             .ToListAsync(cancellationToken: cancellationToken);
 
         var postReportResponses = posts.Select(x => new PostReportResponse()
-        {
-            Id = x.Id.ToString(),
-            IsDeleted = x.IsDeleted,
-            ReportDetails = postReports
-                .Where(y => y.PostId == x.Id)
-                .OrderByDescending(r => r.CreatedAt)
-                .Select(r => new ReportDetailResponse()
-                {
-                    Id = r.Id.ToString(),
-                    Reason = r.ReportReason,
-                    IsProcess = r.IsProcess,
-                    ReportedBy = users.FirstOrDefault(u => u.Id == Guid.Parse(r.UserId))
-                                 ?? new IdNameResponse<Guid>()
-                                 {
-                                     Id = Guid.Empty,
-                                     Name = "Bilinmeyen Kullanıcı"
-                                 },
-                    CreatedAt = r.CreatedAt.Value
-                }).ToList()
-        }).ToList();
+            {
+                Id = x.Id.ToString(),
+                IsDeleted = x.IsDeleted,
+                ReportDetails = postReports
+                    .Where(y => y.PostId == x.Id)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .Select(r => new ReportDetailResponse()
+                    {
+                        Id = r.Id.ToString(),
+                        Reason = r.ReportReason,
+                        IsProcess = r.IsProcess,
+                        ReportedBy = users.FirstOrDefault(u => u.Id == Guid.Parse(r.UserId))
+                                     ?? new IdNameResponse<Guid>()
+                                     {
+                                         Id = Guid.Empty,
+                                         Name = "Bilinmeyen Kullanıcı"
+                                     },
+                        CreatedAt = r.CreatedAt.Value
+                    }).ToList()
+            }).OrderBy(x => x.IsDeleted).ThenByDescending(x => x.LastReportDate)
+            .ToList();
 
         return Response<List<PostReportResponse>>.Success(postReportResponses, 200);
     }
