@@ -31,7 +31,7 @@ public class ReportController(IMediator mediator)
     }
 
     [HttpPost("{postId}/setprocess")]
-    [CustomAuthorize<Permission>(Permission.SuperAdmin)]
+    //[CustomAuthorize<Permission>(Permission.SuperAdmin)]
     public async Task<IActionResult> ReportComment([FromRoute] string postId)
     {
         var result = await mediator.Send(new SetPostReportProcessCommand()
@@ -43,7 +43,7 @@ public class ReportController(IMediator mediator)
     }
     
     [HttpGet]
-    [CustomAuthorize<Permission>(Permission.SuperAdmin)]
+    //[CustomAuthorize<Permission>(Permission.SuperAdmin)]
     public async Task<IActionResult> GetPostReports()
     {
         var result = await mediator.Send(new GetPostReportQuery());
@@ -52,7 +52,7 @@ public class ReportController(IMediator mediator)
     }
     
     [HttpDelete("{postId}")]
-    [CustomAuthorize<Permission>(Permission.SuperAdmin)]
+    //[CustomAuthorize<Permission>(Permission.SuperAdmin)]
     public async Task<IActionResult> DeletePost([FromRoute] string postId)
     {
         var result = await mediator.Send(new DeletePostCommand()
