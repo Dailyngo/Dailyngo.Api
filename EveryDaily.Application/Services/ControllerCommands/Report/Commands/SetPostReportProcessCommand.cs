@@ -20,7 +20,7 @@ public class SetPostReportProcessCommandHandler(MongoDocContext mongoDocContext)
         var filter = Builders<ReportDoc>.Filter.Eq(x => x.PostId, ObjectId.Parse(request.Id));
         var update = Builders<ReportDoc>.Update.Set(x => x.IsProcess, true);
 
-        await mongoDocContext.Reports.Collection.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+        await mongoDocContext.Reports.Collection.UpdateManyAsync(filter, update, cancellationToken: cancellationToken);
 
         return Response<NoContent>.Success(200);
     }
