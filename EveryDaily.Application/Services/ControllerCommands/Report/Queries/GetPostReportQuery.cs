@@ -59,7 +59,7 @@ public class GetPostReportQueryHandler(MongoDocContext mongoDocContext, AppDbCon
                                      Id = Guid.Empty,
                                      Name = "Bilinmeyen Kullanıcı"
                                  },
-                    CreatedAt = x.CreatedAt.Value
+                    CreatedAt = r.CreatedAt.Value
                 }).ToList()
         }).ToList();
 
