@@ -53,7 +53,7 @@ public class GetPostReportQueryHandler(MongoDocContext mongoDocContext, AppDbCon
                     Id = r.Id.ToString(),
                     Reason = r.ReportReason,
                     IsProcess = r.IsProcess,
-                    ReportedBy = users.FirstOrDefault(u => u.Id == Guid.Parse(x.UserId))
+                    ReportedBy = users.FirstOrDefault(u => u.Id == Guid.Parse(r.UserId))
                                  ?? new IdNameResponse<Guid>()
                                  {
                                      Id = Guid.Empty,
