@@ -28,24 +28,21 @@ public class ReportController(IMediator mediator)
         return CreateActionResultInstance(result);
     }
 
-    [HttpPost("{reportId}/setprocess")]
-    public async Task<IActionResult> ReportComment([FromRoute] string reportId)
+    [HttpPost("{postId}/setprocess")]
+    public async Task<IActionResult> ReportComment([FromRoute] string postId)
     {
         var result = await mediator.Send(new SetPostReportProcessCommand()
         {
-            Id = reportId
+            Id = postId
         });
         
         return CreateActionResultInstance(result);
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetPostReports([FromQuery] bool isProcess)
+    public async Task<IActionResult> GetPostReports()
     {
-        var result = await mediator.Send(new GetPostReportQuery()
-        {
-            IsProcess = isProcess
-        });
+        var result = await mediator.Send(new GetPostReportQuery());
         
         return CreateActionResultInstance(result);
     }

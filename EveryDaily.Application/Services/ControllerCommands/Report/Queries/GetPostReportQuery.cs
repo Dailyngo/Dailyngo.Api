@@ -10,7 +10,6 @@ namespace EveryDaily.Application.Services.ControllerCommands.Report.Queries;
 
 public class GetPostReportQuery : IRequest<Response<List<PostReportResponse>>>
 {
-    public bool IsProcess { get; set; }
 }
 
 public class GetPostReportQueryHandler(MongoDocContext mongoDocContext,AppDbContext appDbContext) 
@@ -18,7 +17,7 @@ public class GetPostReportQueryHandler(MongoDocContext mongoDocContext,AppDbCont
 {
     public async Task<Response<List<PostReportResponse>>> Handle(GetPostReportQuery request, CancellationToken cancellationToken)
     {
-        var filter = Builders<ReportDoc>.Filter.Eq(x => x.IsProcess, request.IsProcess);
+        var filter = Builders<ReportDoc>.Filter.Where(x => x.CreatedAt >= DateTimeOffset.UtcNow.AddDays(-30));
 
         var postReports = await mongoDocContext.Reports.Collection
             .Find(filter)
