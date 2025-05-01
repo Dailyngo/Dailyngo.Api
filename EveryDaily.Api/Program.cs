@@ -178,5 +178,6 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<JwtMiddleware>();
 
 app.MapHub<NotificationHub>("/notification-hub");
+app.MapHub<MessageHub>("/message-hub");
 
 app.Run();

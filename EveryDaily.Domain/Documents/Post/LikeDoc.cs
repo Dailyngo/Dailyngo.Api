@@ -3,12 +3,8 @@ using MongoDB.Bson;
 
 namespace EveryDaily.Domain.Documents.Post;
 
-public class LikeDoc : IEntityBase<ObjectId>
+public class LikeDoc : DocBase
 {
-    public ObjectId Id { get; set; }
     public string UserId { get; set; }
     public ObjectId PostId { get; set; }
-    public DateTimeOffset? CreatedAt { get; set; }
-    public DateTimeOffset? UpdatedAt { get; set; }
-    public bool IsDeleted { get; set; }
 }

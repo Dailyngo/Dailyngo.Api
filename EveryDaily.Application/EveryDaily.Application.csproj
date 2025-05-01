@@ -25,7 +25,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Dtos\Message\Request\" />
       <Folder Include="Dtos\User\Request\" />
+      <Folder Include="Services\ControllerCommands\Message\Commads\" />
       <Folder Include="Services\ControllerCommands\Notication\Commands\" />
       <Folder Include="Services\ControllerCommands\User\Commands\" />
     </ItemGroup>

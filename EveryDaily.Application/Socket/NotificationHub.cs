@@ -97,9 +97,13 @@ namespace EveryDaily.Application.Socket
                 totalNotificationCount = await _mongoDocContext.Notifications.Collection
                     .CountDocumentsAsync(n => n.ReceiverId == userId && !n.IsRead && !n.IsDeleted);
             }
+            
+            var totalMessageNotificationCount = await _mongoDocContext.Messages.Collection
+                .CountDocumentsAsync(m => m.ReceiverId == userId && !m.IsRead && !m.IsDeleted);
 
             // Kullanıcıya bildirim sayısını gönder (User yerine Group kullanıldı)
             await Clients.Group(userId).SendAsync(NotificationHubMethods.ReceiveNotification, totalNotificationCount);
+            await Clients.Group(userId).SendAsync(NotificationHubMethods.ReceiveMessageNotification, totalMessageNotificationCount);
         }
     }
 }

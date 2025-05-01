@@ -37,9 +37,17 @@ public class JwtMiddleware
 
         string? token = null;
 
-        if (context.Request.Path.HasValue && context.Request.Path.Value.Contains("notification-hub"))
+        if (context.Request.Path.HasValue && (context.Request.Path.Value.Contains("notification-hub")
+                                              || context.Request.Path.Value.Contains("message-hub")))
         {
             token = context.Request.Query["access_token"];
+            
+            if (string.IsNullOrEmpty(token))
+            {
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsJsonAsync("Unauthorized");
+            }
         }
         else
             token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();

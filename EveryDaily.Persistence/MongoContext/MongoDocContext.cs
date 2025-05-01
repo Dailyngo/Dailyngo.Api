@@ -18,4 +18,6 @@ public class MongoDocContext(IOptions<MongoDbSettings> options)
     public DocSet<NotificationEntity> Notifications => Create<NotificationEntity>();
     public DocSet<FollowRequestEntity> FollowRequests => Create<FollowRequestEntity>();
     public DocSet<ReportDoc> Reports => Create<ReportDoc>();
+    public DocSet<MessageDoc> Messages => Create<MessageDoc>();
+    
 }
