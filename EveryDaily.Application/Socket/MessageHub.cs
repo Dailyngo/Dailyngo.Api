@@ -65,12 +65,14 @@ public class MessageHub : Hub
     {
         var senderId = _userService.GetUserId().ToString();
         var connectionIds = ConnectedUsers.GetValueOrDefault(userId) ?? new HashSet<string>();
+        var sendDate = DateTimeOffset.UtcNow;
         foreach (var connectionId in connectionIds)
         {
             await Clients.Client(connectionId).SendAsync("ReceiveMessage", new MessageHubDto
             {
                 SenderId = Guid.Parse(senderId),
-                Message = message
+                Message = message,
+                SendDate = sendDate,
             });
         }
         
@@ -79,7 +81,7 @@ public class MessageHub : Hub
             SenderId = senderId,
             ReceiverId = userId,
             Content = message,
-            CreatedAt = DateTimeOffset.UtcNow,
+            CreatedAt = sendDate,
             IsRead = connectionIds.Any()
         };
         
