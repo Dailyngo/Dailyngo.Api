@@ -5,6 +5,7 @@ using EveryDaily.Domain.Documents;
 using EveryDaily.Domain.Prefix.Socket;
 using EveryDaily.Persistence.MongoContext;
 using Microsoft.AspNetCore.SignalR;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EveryDaily.Application.Socket;
@@ -66,10 +67,12 @@ public class MessageHub : Hub
         var senderId = _userService.GetUserId().ToString();
         var connectionIds = ConnectedUsers.GetValueOrDefault(userId) ?? new HashSet<string>();
         var sendDate = DateTimeOffset.UtcNow;
+        var messageId = ObjectId.GenerateNewId();
         foreach (var connectionId in connectionIds)
         {
             await Clients.Client(connectionId).SendAsync("ReceiveMessage", new MessageHubDto
             {
+                messageId = messageId.ToString(),
                 SenderId = Guid.Parse(senderId),
                 Message = message,
                 SendDate = sendDate,
@@ -78,6 +81,7 @@ public class MessageHub : Hub
         
         var messageDoc = new MessageDoc
         {
+            Id = messageId,
             SenderId = senderId,
             ReceiverId = userId,
             Content = message,
