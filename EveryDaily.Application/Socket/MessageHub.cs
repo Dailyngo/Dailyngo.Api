@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using EveryDaily.Application.Dtos.Message.Response;
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Domain.Documents;
 using EveryDaily.Domain.Prefix.Socket;
@@ -66,7 +67,11 @@ public class MessageHub : Hub
         var connectionIds = ConnectedUsers.GetValueOrDefault(userId) ?? new HashSet<string>();
         foreach (var connectionId in connectionIds)
         {
-            await Clients.Client(connectionId).SendAsync("ReceiveMessage", message);
+            await Clients.Client(connectionId).SendAsync("ReceiveMessage", new MessageHubDto
+            {
+                SenderId = Guid.Parse(senderId),
+                Message = message
+            });
         }
         
         var messageDoc = new MessageDoc
