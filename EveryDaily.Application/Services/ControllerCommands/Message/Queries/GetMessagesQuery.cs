@@ -16,6 +16,7 @@ public class GetMessagesQuery : IRequest<Response<List<GetMessagesResponse>>>
 {
     public Guid UserId { get; set; }
     public int PageNumber { get; set; }
+    public int PageSize { get; set; }
 }
 
 public class GetMessagesQueryHandler(
@@ -27,7 +28,7 @@ public class GetMessagesQueryHandler(
     public async Task<Response<List<GetMessagesResponse>>> Handle(GetMessagesQuery request,
         CancellationToken cancellationToken)
     {
-        var pageSize = 25;
+        var pageSize = request.PageSize;
         var ownUserId = userService.GetUserId();
 
         var filter1 = Builders<MessageDoc>.Filter.And(

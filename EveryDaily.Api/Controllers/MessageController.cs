@@ -34,12 +34,13 @@ public class MessageController(
     /// Son mesajlasilmis kisilerle olan mesajlari getirir
     /// </summary>
     [HttpGet("{userId}")]
-    public async Task<IActionResult> GetMessages([FromRoute] Guid userId, [FromQuery] int pageNumber = 1)
+    public async Task<IActionResult> GetMessages([FromRoute] Guid userId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 40)
     {
         var result = await mediator.Send(new GetMessagesQuery
         {
             UserId = userId,
-            PageNumber = pageNumber
+            PageNumber = pageNumber,
+            PageSize = pageSize
         });
         return CreateActionResultInstance(result);
     }
