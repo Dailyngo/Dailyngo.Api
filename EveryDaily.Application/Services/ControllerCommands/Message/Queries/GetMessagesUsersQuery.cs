@@ -13,6 +13,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Message.Queries;
 public class GetMessagesUsersQuery : IRequest<Response<List<GetMessagesUsersResponse>>>
 {
     public int PageNumber { get; set; }
+    public int PageSize { get; set; }
 }
 
 public class GetMessagesUsersQueryHandler(MongoDocContext mongoDocContext, IUserService userService,AppDbContext appDbContext)
@@ -21,7 +22,7 @@ public class GetMessagesUsersQueryHandler(MongoDocContext mongoDocContext, IUser
     public async Task<Response<List<GetMessagesUsersResponse>>> Handle(GetMessagesUsersQuery request, CancellationToken cancellationToken)
     {
         var userId = userService.GetUserId();
-        var pageSize = 25;
+        var pageSize = request.PageSize;
 
         var filter  = Builders<MessageDoc>.Filter.Or(
             Builders<MessageDoc>.Filter.Eq(m => m.ReceiverId, userId.ToString()),

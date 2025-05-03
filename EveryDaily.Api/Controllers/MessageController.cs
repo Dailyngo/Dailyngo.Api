@@ -20,11 +20,12 @@ public class MessageController(
     /// Son mesajlasilmis kisileri getirir
     /// </summary>
     [HttpGet("users")]
-    public async Task<IActionResult> GetMessagesUsers([FromQuery] int pageNumber = 1)
+    public async Task<IActionResult> GetMessagesUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 40)
     {
         var result = await mediator.Send(new GetMessagesUsersQuery
         {
-            PageNumber = pageNumber
+            PageNumber = pageNumber,
+            PageSize = pageSize
         });
         return CreateActionResultInstance(result);
     }
