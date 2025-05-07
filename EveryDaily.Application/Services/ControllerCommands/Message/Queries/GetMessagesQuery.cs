@@ -68,16 +68,19 @@ public class GetMessagesQueryHandler(
             Builders<MessageDoc>.Update.Set(m => m.IsRead, true),
             Builders<MessageDoc>.Update.Set(m => m.ReadDate, DateTimeOffset.UtcNow));
 
-        await mongoDocContext.Messages.Collection.UpdateManyAsync(updateFilter, update,
+        var modified = await mongoDocContext.Messages.Collection.UpdateManyAsync(updateFilter, update,
             cancellationToken: cancellationToken);
 
         var totalMessageNotificationCount = await mongoDocContext.Messages.Collection
             .CountDocumentsAsync(m => m.ReceiverId == ownUserId.ToString() && !m.IsRead && !m.IsDeleted,
                 cancellationToken: cancellationToken);
 
-        await hubContext.Clients.Group(ownUserId.ToString()).SendAsync(
-            NotificationHubMethods.ReceiveMessageNotification, totalMessageNotificationCount,
-            cancellationToken: cancellationToken);
+        if (modified is { ModifiedCount: > 0 })
+        {
+            await hubContext.Clients.Group(ownUserId.ToString()).SendAsync(
+                NotificationHubMethods.ReceiveMessageNotification, totalMessageNotificationCount,
+                cancellationToken: cancellationToken);
+        }
 
         return Response<List<GetMessagesResponse>>.Success(response);
     }
