@@ -16,7 +16,8 @@ public class MessageHub : Hub
     private readonly IUserService _userService;
     private readonly IHubContext<NotificationHub> hubContext;
     private static readonly ConcurrentDictionary<string, HashSet<string>> ConnectedUsers = new();
-
+    private static readonly ConcurrentDictionary<string, HashSet<string>> ChatTargetsPerConnection = new();
+    
     public MessageHub(IUserService userService, MongoDocContext mongoDocContext , IHubContext<NotificationHub> hubContext)
     {
         this.hubContext = hubContext;
@@ -42,12 +43,47 @@ public class MessageHub : Hub
         
         return base.OnConnectedAsync();
     }
+    
+    public async Task JoinChat(string targetUserId)
+    {
+        var userId = _userService.GetUserId().ToString();
+        var connectionId = Context.ConnectionId;
+
+        ChatTargetsPerConnection.AddOrUpdate(connectionId,
+            (_) => new HashSet<string> { targetUserId },
+            (_, set) =>
+            {
+                lock (set)
+                {
+                    set.Add(targetUserId);
+                }
+                return set;
+            });
+    }
+    
+    public async Task LeaveChat(string targetUserId)
+    {
+        var connectionId = Context.ConnectionId;
+
+        if (ChatTargetsPerConnection.TryGetValue(connectionId, out var chatSet))
+        {
+            lock (chatSet)
+            {
+                chatSet.Remove(targetUserId);
+                if (chatSet.Count == 0)
+                {
+                    ChatTargetsPerConnection.TryRemove(connectionId, out _);
+                }
+            }
+        }
+    }
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         var userId = _userService.GetUserId().ToString();
         var connectionId = Context.ConnectionId;
-
+        
+        ChatTargetsPerConnection.TryRemove(connectionId, out _);
         if (!ConnectedUsers.TryGetValue(userId, out var set)) return base.OnDisconnectedAsync(exception);
         
         lock (set)
@@ -79,6 +115,10 @@ public class MessageHub : Hub
             });
         }
         
+        bool isRead = connectionIds.Any(connectionId =>
+            ChatTargetsPerConnection.TryGetValue(connectionId, out var activeChats) &&
+            activeChats.Contains(senderId));
+        
         var messageDoc = new MessageDoc
         {
             Id = messageId,
@@ -86,7 +126,7 @@ public class MessageHub : Hub
             ReceiverId = userId,
             Content = message,
             CreatedAt = sendDate,
-            IsRead = connectionIds.Any()
+            IsRead = isRead
         };
         
         await _mongoDocContext.Messages.Collection.InsertOneAsync(messageDoc);
