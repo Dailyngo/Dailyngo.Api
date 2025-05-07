@@ -16,15 +16,19 @@ public class GetMessagesUsersQuery : IRequest<Response<List<GetMessagesUsersResp
     public int PageSize { get; set; }
 }
 
-public class GetMessagesUsersQueryHandler(MongoDocContext mongoDocContext, IUserService userService,AppDbContext appDbContext)
+public class GetMessagesUsersQueryHandler(
+    MongoDocContext mongoDocContext,
+    IUserService userService,
+    AppDbContext appDbContext)
     : IRequestHandler<GetMessagesUsersQuery, Response<List<GetMessagesUsersResponse>>>
 {
-    public async Task<Response<List<GetMessagesUsersResponse>>> Handle(GetMessagesUsersQuery request, CancellationToken cancellationToken)
+    public async Task<Response<List<GetMessagesUsersResponse>>> Handle(GetMessagesUsersQuery request,
+        CancellationToken cancellationToken)
     {
         var userId = userService.GetUserId();
         var pageSize = request.PageSize;
 
-        var filter  = Builders<MessageDoc>.Filter.Or(
+        var filter = Builders<MessageDoc>.Filter.Or(
             Builders<MessageDoc>.Filter.Eq(m => m.ReceiverId, userId.ToString()),
             Builders<MessageDoc>.Filter.Eq(m => m.SenderId, userId.ToString())
         );
@@ -34,12 +38,12 @@ public class GetMessagesUsersQueryHandler(MongoDocContext mongoDocContext, IUser
             .Project(p => p.SenderId == userId.ToString() ? p.ReceiverId : p.SenderId)
             .SortByDescending(m => m.CreatedAt)
             .ToListAsync(cancellationToken);
-        
+
         var userIds = users.Distinct()
             .Skip((request.PageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToList();
-        
+
         var usersResponses = await appDbContext.Users
             .Where(x => userIds.Contains(x.Id.ToString()))
             .Select(x => new GetMessagesUsersResponse
@@ -50,19 +54,19 @@ public class GetMessagesUsersQueryHandler(MongoDocContext mongoDocContext, IUser
                 LastMessage = null
             })
             .ToListAsync(cancellationToken);
-        
+
         var filterUserLastMessage1 = Builders<MessageDoc>.Filter.And(
             Builders<MessageDoc>.Filter.Eq(m => m.ReceiverId, userId.ToString()),
             Builders<MessageDoc>.Filter.In(m => m.SenderId, userIds)
         );
-        
+
         var filterUserLastMessage2 = Builders<MessageDoc>.Filter.And(
             Builders<MessageDoc>.Filter.Eq(m => m.SenderId, userId.ToString()),
             Builders<MessageDoc>.Filter.In(m => m.ReceiverId, userIds)
         );
-        
+
         var filterUserLastMessage = Builders<MessageDoc>.Filter.Or(filterUserLastMessage1, filterUserLastMessage2);
-        
+
         var lastMessages = await mongoDocContext.Messages.Collection
             .Find(filterUserLastMessage)
             .SortByDescending(m => m.CreatedAt)
@@ -72,22 +76,24 @@ public class GetMessagesUsersQueryHandler(MongoDocContext mongoDocContext, IUser
         {
             var lastMessage = lastMessages
                 .OrderByDescending(m => m.CreatedAt)
-                .FirstOrDefault(m => (m.SenderId == userResponse.UserId && m.ReceiverId == userId.ToString()) 
-                                     ||(m.ReceiverId == userResponse.UserId && m.SenderId == userId.ToString()));
-            
+                .FirstOrDefault(m => (m.SenderId == userResponse.UserId && m.ReceiverId == userId.ToString())
+                                     || (m.ReceiverId == userResponse.UserId && m.SenderId == userId.ToString()));
+
             var lastMessagesUnreadCount = lastMessages
                 .Count(m => m.SenderId == userResponse.UserId && !m.IsRead);
 
             if (lastMessage != null)
             {
-                userResponse.LastMessage = lastMessage.Content;
+                userResponse.LastMessage = lastMessage.SenderId == userId.ToString() ? null : lastMessage.Content;
                 userResponse.LastMessageDate = lastMessage.CreatedAt.Value;
                 userResponse.LastMessageOwner = lastMessage.SenderId == userId.ToString();
+                userResponse.LastMessageReadDate = lastMessage.ReadDate;
             }
-            
+
             userResponse.UnreadCount = lastMessagesUnreadCount;
         }
 
-        return Response<List<GetMessagesUsersResponse>>.Success(usersResponses.OrderByDescending(x => x.LastMessageDate).ToList());
+        return Response<List<GetMessagesUsersResponse>>.Success(usersResponses.OrderByDescending(x => x.LastMessageDate)
+            .ToList());
     }
 }

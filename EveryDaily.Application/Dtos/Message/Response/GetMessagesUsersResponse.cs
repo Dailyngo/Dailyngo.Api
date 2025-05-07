@@ -7,6 +7,7 @@ public class GetMessagesUsersResponse
     public string? UserImage { get; set; }
     public int UnreadCount { get; set; }
     public DateTimeOffset LastMessageDate { get; set; }
+    public DateTimeOffset? LastMessageReadDate { get; set; }
     public string? LastMessage { get; set; }
     public bool LastMessageOwner { get; set; }
 }

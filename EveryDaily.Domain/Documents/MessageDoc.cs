@@ -11,4 +11,5 @@ public class MessageDoc : DocBase
     public string SenderId { get; set; }
     public string ReceiverId { get; set; }
     public bool IsRead { get; set; }
+    public DateTimeOffset? ReadDate { get; set; }
 }
