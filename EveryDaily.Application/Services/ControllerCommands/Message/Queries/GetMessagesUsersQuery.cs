@@ -88,6 +88,12 @@ public class GetMessagesUsersQueryHandler(
                 userResponse.LastMessageDate = lastMessage.CreatedAt.Value;
                 userResponse.LastMessageOwner = lastMessage.SenderId == userId.ToString();
                 userResponse.LastMessageReadDate = lastMessage.ReadDate;
+
+                if (!string.IsNullOrEmpty(userResponse.LastMessage))
+                {
+                    if(userResponse.LastMessage.Contains("img"))
+                       userResponse.LastMessage = "Bir resim gönderdi";
+                }
             }
 
             userResponse.UnreadCount = lastMessagesUnreadCount;
