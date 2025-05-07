@@ -64,8 +64,9 @@ public class GetMessagesQueryHandler(
             Builders<MessageDoc>.Filter.Eq(m => m.IsRead, false)
         );
 
-        var update = Builders<MessageDoc>.Update.Set(m => m.IsRead, true)
-            .Set(m => m.ReadDate, DateTimeOffset.UtcNow);
+        var update = Builders<MessageDoc>.Update.Combine(
+            Builders<MessageDoc>.Update.Set(m => m.IsRead, true),
+            Builders<MessageDoc>.Update.Set(m => m.ReadDate, DateTimeOffset.UtcNow));
 
         await mongoDocContext.Messages.Collection.UpdateManyAsync(updateFilter, update,
             cancellationToken: cancellationToken);
