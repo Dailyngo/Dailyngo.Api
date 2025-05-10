@@ -8,7 +8,7 @@ public class CreatePostRequest
     //[MaxLength(1000,ErrorMessage = "Gönderi uzunluğu 1000 karakterden fazla olamaz.")]
     [MinLength(1,ErrorMessage = "Gönderi uzunluğu 1 karakterden az olamaz.")]
     public string Content { get; set; }
-
+    public string? ImageKey { get; set; }
     public string? Id { get; set; }
    // public string? ImageUrl { get; set; }
 }

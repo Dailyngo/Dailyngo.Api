@@ -70,7 +70,8 @@ public class CreatePostCommandHandler(
             UserId = userId,
             CreatedAt = DateTimeOffset.UtcNow,
             ViewCount = 0,
-            LikeCount = 0
+            LikeCount = 0,
+            ImageUrl = request.Data.ImageKey,
         };
 
         await mongoDocContext.Posts.Collection.InsertOneAsync(post, cancellationToken: cancellationToken);
