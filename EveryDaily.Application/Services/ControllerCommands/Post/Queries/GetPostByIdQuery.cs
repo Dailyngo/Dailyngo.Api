@@ -65,7 +65,8 @@ public class GetPostByIdQueryHandler(
             IsLiked = isLiked,
             PostDate = post.CreatedAt,
             LikeCount = post.LikeCount,
-            CommentCount = post.CommentCount
+            CommentCount = post.CommentCount,
+            ImageKey = post.ImageUrl,
         };
 
         return Response<GetUserPostResponse>.Success(response);

@@ -108,7 +108,8 @@ public class GetHomePagePostQueryHandler(
                 PostDate = x.Post.CreatedAt,
                 LikeCount = x.Post.LikeCount,
                 CommentCount = x.Post.CommentCount,
-                IsOwner = x.Post.UserId == userId.ToString()
+                IsOwner = x.Post.UserId == userId.ToString(),
+                ImageKey = x.Post.ImageUrl
             };
         }).ToList();
 

@@ -29,6 +29,9 @@ public class CreatePostCommandHandler(
     public async Task<Core.Dtos.Response<NoContent>> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
         var userId = userService.GetUserId().ToString();
+        
+        if (string.IsNullOrEmpty(request.Data.Content) && string.IsNullOrEmpty(request.Data.ImageKey))
+            return Core.Dtos.Response<NoContent>.Fail(PostErrorMessage.ContentOrImageRequired, 400);
 
         if (request.Data.Id != null)
         {
@@ -70,7 +73,8 @@ public class CreatePostCommandHandler(
             UserId = userId,
             CreatedAt = DateTimeOffset.UtcNow,
             ViewCount = 0,
-            LikeCount = 0
+            LikeCount = 0,
+            ImageUrl = request.Data.ImageKey,
         };
 
         await mongoDocContext.Posts.Collection.InsertOneAsync(post, cancellationToken: cancellationToken);

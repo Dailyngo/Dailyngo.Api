@@ -108,6 +108,7 @@ public class GetUserPostQueryHandler(
             PostDate = x.CreatedAt,
             LikeCount = x.LikeCount,
             CommentCount = x.CommentCount,
+            ImageKey = x.ImageUrl
         }).ToList();
 
         return Response<List<GetUserPostResponse>>.Success(response);

@@ -14,4 +14,5 @@ public class GetUserPostResponse
     public Guid UserId { get; set; }
     public string? UserName { get; set; }
     public string? UserProfileImage { get; set; }
+    public string? ImageKey { get; set; }
 }
