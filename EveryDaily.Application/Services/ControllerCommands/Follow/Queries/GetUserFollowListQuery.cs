@@ -78,6 +78,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Queries
                     item.IsFollowing = userFollow.FollowingId == item.UserId;
                     item.IsFollower = userFollow.FollowerId == item.UserId;
                 }
+                item.IsOwner = item.UserId == userId;
             });
             
             followList = followList.OrderByDescending(x => x.IsFollowing)
