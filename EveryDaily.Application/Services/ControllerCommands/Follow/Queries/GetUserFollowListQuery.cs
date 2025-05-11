@@ -75,8 +75,8 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Queries
                     .FirstOrDefault(x => x.FollowerId == item.UserId || x.FollowingId == item.UserId);
                 if (userFollow != null)
                 {
-                    item.IsFollowing = userFollow.FollowerId == item.UserId;
-                    item.IsFollower = userFollow.FollowingId == item.UserId;
+                    item.IsFollowing = userFollow.FollowingId == item.UserId;
+                    item.IsFollower = userFollow.FollowerId == item.UserId;
                 }
             });
             
