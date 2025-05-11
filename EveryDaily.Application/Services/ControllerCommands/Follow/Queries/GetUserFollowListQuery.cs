@@ -2,8 +2,10 @@
 using EveryDaily.Application.Services.UserService;
 using EveryDaily.Core.Dtos;
 using EveryDaily.Persistence;
+using EveryDaily.Persistence.MongoContext;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace EveryDaily.Application.Services.ControllerCommands.Follow.Queries
 {
@@ -14,7 +16,7 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Queries
         public int PageNumber { get; set; } = 1;
     }
 
-    public class GetUserFollowListQueryHandler(AppDbContext context, IUserService userService)
+    public class GetUserFollowListQueryHandler(AppDbContext context, IUserService userService,MongoDocContext mongoDocContext)
         : IRequestHandler<GetUserFollowListQuery, Response<List<UserFollowResponse>>>
     {
         public async Task<Response<List<UserFollowResponse>>> Handle(GetUserFollowListQuery request,
@@ -33,6 +35,10 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Queries
                     s.FollowerId,
                     s.FollowingId
                 }).ToListAsync(cancellationToken);
+            
+            var existingRequests = await mongoDocContext.FollowRequests.Collection.Find(
+                f => f.SenderId == userId.ToString())
+                .Project(f => f.ReceiverId).ToListAsync(cancellationToken);
 
             List<UserFollowResponse> followList;
 
@@ -73,6 +79,9 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Queries
             {
                 var userFollows = userFollowTable
                     .Where(x => x.FollowerId == item.UserId || x.FollowingId == item.UserId).ToList();
+                
+                item.IsFollowRequest = existingRequests.Any(x => x == item.UserId.ToString());
+                
                 if (userFollows.Any())
                 {
                     item.IsFollowing = userFollows.Any(x => x.FollowerId == userId && x.FollowingId == item.UserId);

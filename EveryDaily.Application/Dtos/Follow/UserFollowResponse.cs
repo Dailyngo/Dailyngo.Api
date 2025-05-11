@@ -14,5 +14,6 @@ namespace EveryDaily.Application.Dtos.Follow
         public bool IsFollower { get; set; } // Kullanıcıyı takip eden kişi mi?
         public bool IsFollowing { get; set; } // Kullanıcıyı takip ediyor mu?
         public bool IsOwner { get; set; } // Kullanıcı kendisi mi?
+        public bool IsFollowRequest { get; set; } // Kullanıcıdan takip isteği var mı?
     }
 }
