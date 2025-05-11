@@ -10,5 +10,8 @@ namespace EveryDaily.Application.Dtos.Follow
     {
         public Guid UserId { get; set; }
         public string FullName { get; set; }
+        public string UserName { get; set; }
+        public bool IsFollower { get; set; } // Kullanıcıyı takip eden kişi mi?
+        public bool IsFollowing { get; set; } // Kullanıcıyı takip ediyor mu?
     }
 }
