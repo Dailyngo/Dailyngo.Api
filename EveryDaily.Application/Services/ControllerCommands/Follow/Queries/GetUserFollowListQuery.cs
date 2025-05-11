@@ -71,12 +71,12 @@ namespace EveryDaily.Application.Services.ControllerCommands.Follow.Queries
             
             followList.ForEach(item =>
             {
-                var userFollow = userFollowTable
-                    .FirstOrDefault(x => x.FollowerId == item.UserId || x.FollowingId == item.UserId);
-                if (userFollow != null)
+                var userFollows = userFollowTable
+                    .Where(x => x.FollowerId == item.UserId || x.FollowingId == item.UserId).ToList();
+                if (userFollows.Any())
                 {
-                    item.IsFollowing = userFollow.FollowingId == item.UserId;
-                    item.IsFollower = userFollow.FollowerId == item.UserId;
+                    item.IsFollowing = userFollows.Any(x => x.FollowerId == userId && x.FollowingId == item.UserId);
+                    item.IsFollower = userFollows.Any(x => x.FollowerId == item.UserId && x.FollowingId == userId);
                 }
                 item.IsOwner = item.UserId == userId;
             });
