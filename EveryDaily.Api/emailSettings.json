@@ -1,9 +1,9 @@
 {
   "EmailOptions": {
-    "From": "mikroblog.devteam@gmail.com",
-    "Psw": "bwuvfuaxyooqteat",
-    "Host": "smtp.gmail.com",
-    "Port": 587,
-    "FromName" : "Dailyngo Hesap Ekibi"
+    "From": "YOUR_MAIL",
+    "Psw": "YOUR_PASSWORD",
+    "Host": "YOUR_MAIL_HOST",
+    "Port": YOUR_MAIL_HOST_PORT,
+    "FromName" : "EMAIL_SENDER_NAME"
   }
 }
